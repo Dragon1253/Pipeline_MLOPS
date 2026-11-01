@@ -1,0 +1,24 @@
+{
+  "metrics": {
+    "log_loss": 0.5129998306177667,
+    "accuracy": 0.746,
+    "precision": 0.5846153846153846,
+    "recall": 0.2753623188405797,
+    "f1": 0.37438423645320196,
+    "roc_auc": 0.7451157018175995,
+    "average_precision": 0.5126103314632798,
+    "confusion_matrix": [
+      [
+        335,
+        27
+      ],
+      [
+        100,
+        38
+      ]
+    ]
+  },
+  "labeled_rows": 500,
+  "status": "normal",
+  "alert": null
+}

@@ -1,0 +1,85 @@
+{
+  "episode_id": "episode-003",
+  "threshold": 0.5412309701555961,
+  "performance_history": [
+    {
+      "window": "focus",
+      "metrics": {
+        "log_loss": 25.227651317516923,
+        "accuracy": 0.288,
+        "precision": 0.2691511387163561,
+        "recall": 0.9774436090225563,
+        "f1": 0.42207792207792205,
+        "roc_auc": 0.5041691422015528,
+        "average_precision": 0.26761798714124124,
+        "confusion_matrix": [
+          [
+            14,
+            353
+          ],
+          [
+            3,
+            130
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    },
+    {
+      "window": "confirmation-1",
+      "metrics": {
+        "log_loss": 23.908993914968622,
+        "accuracy": 0.328,
+        "precision": 0.3148148148148148,
+        "recall": 0.9807692307692307,
+        "f1": 0.4766355140186916,
+        "roc_auc": 0.5043604651162791,
+        "average_precision": 0.31392860009465506,
+        "confusion_matrix": [
+          [
+            11,
+            333
+          ],
+          [
+            3,
+            153
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    },
+    {
+      "window": "confirmation-2",
+      "metrics": {
+        "log_loss": 25.986239073662254,
+        "accuracy": 0.274,
+        "precision": 0.2581967213114754,
+        "recall": 0.9921259842519685,
+        "f1": 0.4097560975609756,
+        "roc_auc": 0.5122965527432396,
+        "average_precision": 0.25882777470841817,
+        "confusion_matrix": [
+          [
+            11,
+            362
+          ],
+          [
+            1,
+            126
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    }
+  ],
+  "deployment": {
+    "reference_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "active_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "model_changed": false,
+    "preprocessing_changed": false,
+    "events": []
+  }
+}

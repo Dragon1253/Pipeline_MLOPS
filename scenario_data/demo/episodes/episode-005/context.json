@@ -1,0 +1,85 @@
+{
+  "episode_id": "episode-005",
+  "threshold": 0.5412309701555961,
+  "performance_history": [
+    {
+      "window": "focus",
+      "metrics": {
+        "log_loss": 0.5435363482548169,
+        "accuracy": 0.72,
+        "precision": 0.6111111111111112,
+        "recall": 0.28205128205128205,
+        "f1": 0.38596491228070173,
+        "roc_auc": 0.7342166070363744,
+        "average_precision": 0.5586210655324311,
+        "confusion_matrix": [
+          [
+            316,
+            28
+          ],
+          [
+            112,
+            44
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    },
+    {
+      "window": "confirmation-1",
+      "metrics": {
+        "log_loss": 0.5379962540166316,
+        "accuracy": 0.716,
+        "precision": 0.5901639344262295,
+        "recall": 0.23529411764705882,
+        "f1": 0.3364485981308411,
+        "roc_auc": 0.7420278389934265,
+        "average_precision": 0.553397405355304,
+        "confusion_matrix": [
+          [
+            322,
+            25
+          ],
+          [
+            117,
+            36
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": false
+    },
+    {
+      "window": "confirmation-2",
+      "metrics": {
+        "log_loss": 0.5129998306177667,
+        "accuracy": 0.746,
+        "precision": 0.5846153846153846,
+        "recall": 0.2753623188405797,
+        "f1": 0.37438423645320196,
+        "roc_auc": 0.7451157018175995,
+        "average_precision": 0.5126103314632798,
+        "confusion_matrix": [
+          [
+            335,
+            27
+          ],
+          [
+            100,
+            38
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": false
+    }
+  ],
+  "deployment": {
+    "reference_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "active_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "model_changed": false,
+    "preprocessing_changed": false,
+    "events": []
+  }
+}

@@ -1,0 +1,18 @@
+-r requirements.txt
+
+# Environnement Nemotron actuel ; inclut Ollama pour la comparaison locale.
+langchain==1.1.0
+langchain-core==1.6.10
+langgraph==1.0.4
+langgraph-prebuilt==1.0.5
+langgraph-checkpoint==3.0.1
+langgraph-sdk==0.2.10
+langchain-ollama==1.0.0
+ollama==0.6.3
+pydantic==2.12.5
+langchain-nvidia-ai-endpoints==1.5.0
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.14.0
+scikit-learn==1.5.0
+joblib==1.4.2
