@@ -11,6 +11,8 @@ def show_progress(event):
         print(f"Modèle : appel {event['call']}", flush=True)
     elif event['event'] == 'tool_completed':
         print(f"{event['evidence_id']} {event['tool']} : {event['result'].get('status')}", flush=True)
+    elif event['event'] == 'model_retry':
+        print(f"Relance {event['attempt']} : {event['message']}", flush=True)
 
 
 def main(argv=None):

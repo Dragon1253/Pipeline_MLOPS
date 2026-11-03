@@ -1,5 +1,9 @@
 # Agent d’investigation MLOps
 
+Une plateforme locale de monitoring est disponible : voir [PLATFORM.md](PLATFORM.md).
+Lancer `./start-platform.ps1` puis ouvrir `http://127.0.0.1:8000` pour suivre les
+métriques, les investigations, la correction simulée et les rapports.
+
 Un agent LangChain examine une alerte, choisit ses outils et rend un diagnostic.
 Il utilise Nemotron via NVIDIA ou Qwen via Ollama local. Aucun contrôleur ne valide,
 ne refuse ou ne remplace sa conclusion pendant l’investigation.
@@ -53,7 +57,12 @@ flowchart TD
 4. Le modèle choisit les appels natifs. `tools.py` exécute les calculs sur les
    fichiers complets ; chaque opération reçoit un identifiant de preuve `E0001`, etc.
 5. `agent.py` conserve les résultats, rappelle la mémoire et le budget, puis renvoie
-   la réponse finale brute et son objet JSON. Une réponse sans outil termine l’enquête.
+   la réponse finale brute et son objet JSON. Le diagnostic du prototype contient
+   `cause_probable`, `resume` et `preuves`, sans champ `limites`. Une réponse vide
+   sans outil peut être relancée deux fois. Une réponse visible sans diagnostic JSON
+   ou avec un JSON mal formé peut aussi recevoir deux demandes de poursuite ou de
+   correction de syntaxe. Ces relances partagent le budget existant et ne jugent pas
+   la cause proposée.
 6. `--evaluate`, facultatif, compare la cause à la vérité synthétique **après** la fin,
    sans nouvelle requête ni retour au modèle. Cette comparaison reste dans la CLI.
 
@@ -150,7 +159,8 @@ print(result["remaining_model_calls"])
 
 L’appel est synchrone et renvoie un dictionnaire sérialisable en JSON. `model=`
 permet aussi de fournir un modèle LangChain existant acceptant `bind_tools`.
-Les événements sont `model_started`, `tool_completed` et `investigation_completed`.
+Les événements sont `model_started`, `model_retry`, `tool_started`, `tool_completed`
+et `investigation_completed`.
 Les callbacks d’outils peuvent être appelés depuis plusieurs threads si le modèle
 demande plusieurs analyses dans une décision.
 

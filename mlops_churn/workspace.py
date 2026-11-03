@@ -43,7 +43,10 @@ class InvestigationWorkspace:
 
     def path(self, resource_id):
         if resource_id not in self.resources:
-            raise ValueError('Ressource inconnue. Utiliser inspect_files avec operation=list.')
+            raise ValueError(
+                'Ressource inconnue. Utiliser un identifiant exact du catalogue dans resource_id : '
+                + ', '.join(sorted(self.resources))
+                + '. Les noms de fichiers (.csv/.json) et les chemins ne sont pas des identifiants.')
         item = self.resources[resource_id]
         path = (self.directory / item['file']).resolve()
         if not path.is_relative_to(self.directory) or path.suffix not in {'.csv', '.json'}:

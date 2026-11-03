@@ -17,5 +17,9 @@ artifacts/agent_experiments/
 artifacts/langchain_explorations/
 artifacts/agent_diagnostics/
 results/
+platform_data/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
 scenario_data/generated/
 !.env.example

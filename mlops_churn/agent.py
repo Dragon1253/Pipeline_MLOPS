@@ -31,6 +31,8 @@ def create_tools(workspace, run_directory, *, include_conditional=True,
             entry = {'evidence_id': f'E{len(evidence) + 1:04d}', 'tool': name,
                      'arguments': arguments, 'created_at': utc_now(), 'result': {'status': 'running'}}
             evidence.append(entry)
+        if on_event:
+            on_event({'event': 'tool_started', **deepcopy(entry)})
         try:
             result = operation(entry['evidence_id'])
         except Exception as exc:
@@ -46,7 +48,7 @@ def create_tools(workspace, run_directory, *, include_conditional=True,
     @tool
     def inspect_files(resource_id: str, columns: list[str] | None = None,
                       offset: int = 0, limit: ReadLimit = 5) -> str:
-        """Lire une ressource du catalogue public par identifiant. CSV : offset et limit en lignes (1–20), columns facultatif. JSON : offset en caractères, 250 caractères par unité de limit. Les outils analytiques calculent sur les lots complets."""
+        """Lire une ressource avec son id exact du catalogue public, par exemple alert, context, predictions ou feedback. Ne pas ajouter .json, .csv ou un chemin ; list n'est pas un resource_id. CSV : offset et limit en lignes (1–20), columns facultatif. JSON : offset en caractères, 250 caractères par unité de limit. Les outils analytiques calculent sur les lots complets."""
         args = dict(resource_id=resource_id, columns=columns, offset=offset, limit=limit)
         def read(evidence_id):
             workspace.verify()
@@ -66,16 +68,37 @@ def create_tools(workspace, run_directory, *, include_conditional=True,
                 include_model_comparison=include_model_comparison)], evidence
 
 
-def parse_final(text):
+def final_candidates(text):
     candidates = [text.strip(), *re.findall(r'```(?:json)?\s*\n(.*?)```', text, re.DOTALL)]
     candidates.extend(text[m.start():] for m in re.finditer(r'(?m)^\s*\{', text))
-    for value in candidates:
+    return candidates
+
+
+def parse_final(text):
+    for value in final_candidates(text):
         try:
             result, _ = json.JSONDecoder().raw_decode(value.strip())
             if isinstance(result, dict) and 'cause_probable' in result:
                 return result
         except ValueError:
             pass
+    return None
+
+
+def final_json_syntax_error(text):
+    """Report syntax errors in an attempted diagnosis, without judging its cause.
+
+    Plain prose and valid JSON with no diagnosis are separate protocol failures.
+    No brackets or other characters are repaired locally.
+    """
+    for value in final_candidates(text):
+        value = value.strip()
+        if not value.startswith('{') or not re.search(r'"cause_probable"\s*:', value):
+            continue
+        try:
+            json.JSONDecoder().raw_decode(value)
+        except json.JSONDecodeError as exc:
+            return {'message': exc.msg, 'line': exc.lineno, 'column': exc.colno}
     return None
 
 
@@ -86,13 +109,14 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
     episode_dir contains focus/, confirmation-*/, alert.json, context.json and
     active.joblib. reference_dir contains reference_data.csv and models/reference.joblib.
     model optionally supplies a LangChain chat model implementing bind_tools.
-    on_event receives model_started, tool_completed and investigation_completed.
+    on_event receives model_started, model_retry, tool_started, tool_completed
+    and investigation_completed.
     No simulation truth is read and no conclusion is accepted or rejected.
     """
     from langchain.agents import create_agent
     from langchain.agents.middleware import (ModelCallLimitMiddleware, ToolCallLimitMiddleware,
-                                            before_model, dynamic_prompt)
-    from langchain_core.messages import message_to_dict
+                                            after_model, before_model, dynamic_prompt)
+    from langchain_core.messages import HumanMessage, message_to_dict
     from urllib.parse import urlparse
 
     if provider not in {'nvidia', 'local'}:
@@ -100,6 +124,10 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
     profile = 'nemotron' if provider == 'nvidia' else 'local'
     config = json.loads((ROOT / 'configs' / f'{profile}.json').read_text(encoding='utf-8'))
     config.update(options or {})
+    for key in ('max_empty_response_retries', 'max_json_format_retries'):
+        config.setdefault(key, 2)
+        if not isinstance(config[key], int) or isinstance(config[key], bool) or config[key] < 0:
+            raise ValueError(key + ' doit être un entier positif ou nul.')
     for key in ('max_model_calls', 'max_tool_calls'):
         if not isinstance(config[key], int) or isinstance(config[key], bool) or config[key] < 1:
             raise ValueError(key + ' doit être un entier positif.')
@@ -121,6 +149,8 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
     llm = model if model is not None else make_model(config, run / 'transport')
     trace, usages, final_text, failure = [], [], '', None
     model_calls = 0
+    empty_response_retries = 0
+    json_format_retries = 0
     write_json(run / 'runtime.json', {'model': config, 'prompt': OPEN_INVESTIGATION_PROMPT,
                'source_hashes': {p.name: sha256(p) for p in Path(__file__).parent.glob('*.py')}})
 
@@ -128,6 +158,68 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
     def stop_stalled(state, runtime):
         if repeated_cached_read(state['messages'], 3):
             raise RuntimeError('Lectures identiques répétées sans information nouvelle.')
+
+    @after_model(can_jump_to=['model'])
+    def recover_response_format(state, runtime):
+        """Recover empty or unstructured output; never evaluate a diagnosis."""
+        nonlocal empty_response_retries, json_format_retries
+        message = state['messages'][-1]
+        if message.type != 'ai' or message.tool_calls:
+            return None
+        # Truncation and invalid calls have their own failure modes; never retry them here.
+        if response_truncated(message):
+            raise RuntimeError('Réponse tronquée par la limite de tokens ; voir trace.json.')
+        if message.invalid_tool_calls:
+            raise RuntimeError('Le modèle a renvoyé un appel d’outil invalide ; voir trace.json.')
+        visible = message_text(message).strip()
+        if visible:
+            if parse_final(visible) is not None:
+                return None
+            syntax_error = final_json_syntax_error(visible)
+            location = f"ligne {syntax_error['line']}, colonne {syntax_error['column']}" if syntax_error else None
+            problem = (f"Diagnostic JSON invalide ({location} : {syntax_error['message']}). "
+                       if syntax_error else 'Diagnostic JSON absent de la réponse finale. ')
+            if (json_format_retries >= config['max_json_format_retries']
+                    or model_calls >= config['max_model_calls']):
+                raise RuntimeError(
+                    problem +
+                    f'Relances de format effectuées : {json_format_retries}. '
+                    'La réponse et les analyses sont conservées dans les traces.')
+            json_format_retries += 1
+            if on_event:
+                on_event({'event': 'model_retry', 'reason': 'invalid_json' if syntax_error else 'missing_json',
+                          'attempt': json_format_retries, 'format_error': syntax_error,
+                          'message': (f'JSON final invalide ({location}) : correction du format demandée.'
+                                      if syntax_error else 'Diagnostic JSON absent : poursuite de l’investigation demandée.')})
+            feedback = (
+                f"Ton diagnostic contient une erreur de syntaxe JSON : {syntax_error['message']} "
+                f'({location}, dans l’objet JSON). Corrige uniquement le format de ta dernière réponse. '
+                'Conserve la même cause_probable, le même résumé et les mêmes preuves. '
+                'Ne recommence pas l’investigation et ne demande pas de nouvelle analyse. '
+                if syntax_error else
+                'Ta réponse ne contient pas de diagnostic JSON. Si tu prévois une analyse, '
+                'effectue son appel natif maintenant ; annoncer une analyse ne l’exécute pas. '
+                'Si les preuves sont suffisantes, donne directement ton diagnostic final. '
+                'Si elles restent insuffisantes, tu peux conclure undetermined avec un résumé explicatif. ')
+            return {'messages': [HumanMessage(content=(feedback +
+                'Le prototype attend uniquement les trois champs cause_probable, resume et preuves '
+                '(liste d’identifiants E). Supprime le champ limites. '
+                'Ferme les listes avec ] et les objets avec }. Renvoie uniquement cet objet JSON.'))], 'jump_to': 'model'}
+        if (empty_response_retries >= config['max_empty_response_retries']
+                or model_calls >= config['max_model_calls']):
+            raise RuntimeError(
+                'Le modèle a renvoyé une réponse vide, sans diagnostic ni appel d’outil natif. '
+                f'Relances effectuées : {empty_response_retries}. '
+                'Les analyses déjà réalisées sont conservées dans les traces.')
+        empty_response_retries += 1
+        if on_event:
+            on_event({'event': 'model_retry', 'reason': 'empty_response', 'attempt': empty_response_retries,
+                      'message': 'Réponse du modèle vide : nouvelle demande, avec conservation des analyses.'})
+        return {'messages': [HumanMessage(content=(
+            'Ta dernière réponse ne contient ni texte visible ni appel d’outil natif. '
+            'Poursuis cette même investigation à partir des analyses déjà disponibles : '
+            'appelle un outil natif si une analyse est nécessaire, ou fournis ton diagnostic '
+            'JSON avec uniquement cause_probable, resume et preuves (identifiants E), sans champ limites.'))], 'jump_to': 'model'}
 
     @dynamic_prompt
     def progress(request):
@@ -145,11 +237,11 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
 
     agent = create_agent(model=llm, tools=tools, system_prompt=OPEN_INVESTIGATION_PROMPT,
         middleware=[ToolCallLimitMiddleware(run_limit=config['max_tool_calls'], exit_behavior='continue'),
-                    stop_stalled, progress,
+                    stop_stalled, progress, recover_response_format,
                     ModelCallLimitMiddleware(run_limit=config['max_model_calls'], exit_behavior='error')])
     incident = initial_incident_context(workspace)
     write_json(run / 'initial_observations.json', incident)
-    task = "Investiguer cette alerte. Choisis les analyses utiles et donne ton diagnostic avec preuves et limites.\n"
+    task = "Investiguer cette alerte. Choisis les analyses utiles et donne ton diagnostic JSON avec cause_probable, resume et preuves.\n"
     task += json.dumps(incident, ensure_ascii=False)
     if provider == 'local':
         task += '\n/think' if config.get('reasoning') else '\n/no_think'
@@ -185,6 +277,8 @@ def investigate(episode_dir, reference_dir='scenario_data/demo', *, provider='nv
               'run_directory': str(run.resolve()), 'final_diagnosis': diagnosis, 'raw_final_text': final_text,
               'duration_seconds': time.monotonic() - started, 'error': failure,
               'model_calls': model_calls, 'tool_calls': len(evidence),
+              'empty_response_retries': empty_response_retries,
+              'json_format_retries': json_format_retries,
               'tools_used': [e['tool'] for e in evidence], 'evidence': evidence,
               'remaining_model_calls': max(0, config['max_model_calls'] - model_calls),
               'remaining_tool_calls': max(0, config['max_tool_calls'] - len(evidence)),
@@ -207,6 +301,8 @@ Réserve une réponse sans outil à ton diagnostic final ; ne termine pas par un
 Outils analytiques disponibles : describe_resource, check_data_quality, compare_tables, compare_distributions,
 evaluate_predictions, compare_windows, inspect_deployment, compare_conditional_relationship,
 compare_model_versions ; inspect_files lit des échantillons du catalogue.
+Les paramètres de ressources utilisent les valeurs id du catalogue, jamais les noms de fichiers ou les chemins.
+Par exemple, utilise alert et context, pas alert.json ou context.json ; list n'est pas une ressource.
 compare_tables examine les mêmes clients entre étapes ; compare_distributions examine des populations.
 compare_conditional_relationship examine la relation cible/caractéristiques entre périodes.
 compare_model_versions exécute deux modèles locaux sur les mêmes entrées et labels, sans réentraînement.
@@ -214,15 +310,18 @@ Un changement déclaré de version seul ne prouve pas une dégradation causée p
 Les manquants communs ne sont pas des modifications. Les comparaisons doivent aligner les identifiants.
 N'invente ni mesure ni preuve ; cite les identifiants E réellement obtenus. Distingue constats et hypothèses.
 Ne modifie ni données ni modèles. Lorsque tu as assez d'éléments, donne directement ta réponse finale en français.
-Présente la cause probable, les mesures qui la soutiennent, les alternatives et les limites.
-Commence par un objet JSON avec cause_probable, resume, preuves (liste d'identifiants E) et limites.
+Réponds uniquement par un objet JSON court contenant exactement trois champs :
+cause_probable (chaîne), resume (court résumé fondé sur les mesures) et preuves (liste d'identifiants E).
+Le prototype ne demande pas de champ limites ni d'analyse séparée des alternatives.
+Les preuves doivent contenir uniquement des identifiants E, sans descriptions dans la liste.
+Ferme la liste preuves avec ] puis l'objet avec }. Aucun texte avant ou après le JSON.
 Causes possibles : data_corruption, data_drift, concept_drift, deployment_regression, no_incident, undetermined.
-Un texte bref peut suivre le JSON. Aucun outil de soumission n'est disponible ; ta réponse finale termine l'enquête.
+Aucun outil de soumission n'est disponible ; ta réponse finale termine l'enquête.
 '''
 
 OPEN_MEMORY_INSTRUCTIONS = '''La mémoire rappelle seulement les opérations effectuées et leurs résultats.
 Réutilise les preuves valides, y compris les contrôles sans anomalie ; ne répète pas un calcul identique sans raison.
-Choisis les analyses utiles, puis donne ton diagnostic final avec les preuves et limites. Aucune validation de cause
+Choisis les analyses utiles, puis donne ton diagnostic final avec cause_probable, resume et preuves. Aucune validation de cause
 ni acceptation/refus ne sera effectuée pendant ton investigation.'''
 
 def repeated_cached_read(messages, limit):
