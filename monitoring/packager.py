@@ -35,7 +35,8 @@ def _write_window(folder, record):
     write_json(folder / "monitoring.json", record.monitoring)
 
 
-def write_episode(destination, reference_dir, monitor, incident, active_model_path, *, deployment_events=None):
+def write_episode(destination, reference_dir, monitor, incident, active_model_path, *, deployment_events=None,
+                  extra_context=None):
     """Crée ``destination`` (nouveau dossier) et y écrit le paquet de l'incident."""
     destination = Path(destination)
     if destination.exists():
@@ -78,9 +79,11 @@ def write_episode(destination, reference_dir, monitor, incident, active_model_pa
         "persistence_windows": monitor.persistence,
         "windows": [{"window": r.window_id, "role": roles.get(r.window_id, "other"),
                      "scored_at_step": r.scored_at, "labeled_at_step": r.labeled_at,
-                     "log_loss": (r.metrics or {}).get("log_loss"), "signals": r.signals}
+                     "log_loss": (r.metrics or {}).get("log_loss"), "risk": getattr(r, "risk", None),
+                     "signals": r.signals}
                     for r in (monitor.records[w] for w in monitor.order)],
         "note": "Signaux calculés sans labels au moment du scoring ; ils ne désignent aucune cause.",
+        **({"prediction": extra_context} if extra_context else {}),
     })
     incident.packaged = True
     return destination

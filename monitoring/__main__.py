@@ -7,6 +7,8 @@
     python -m monitoring predict --target target_h2 --budget 5
     python -m monitoring predict --target target_h2 --sequence gru lstm
     python -m monitoring analyze --target target_h2
+    python -m monitoring train-predictor
+    python -m monitoring run --scenario data_corruption --seed 7 --label-delay 2 --predict
 """
 import argparse
 import json
@@ -38,6 +40,9 @@ def build_parser():
     run.add_argument("--seed", type=int, default=1)
     run.add_argument("--investigate", choices=("nvidia", "local"),
                      help="transmettre le premier paquet d'alerte à l'agent d'analyse")
+    run.add_argument("--predict", action="store_true",
+                     help="ajouter le risque prédit et les alertes prédictives (prédicteur entraîné requis)")
+    run.add_argument("--predictor", help="chemin du prédicteur (par défaut monitoring_runs/predictor/predictor.joblib)")
     evaluate = sub.choices["evaluate"]
     evaluate.add_argument("--scenarios", nargs="+", choices=STREAM_SCENARIOS, default=list(STREAM_SCENARIOS))
     evaluate.add_argument("--seeds", type=int, default=30, help="nombre de flux par scénario")
@@ -63,6 +68,10 @@ def build_parser():
     analyze.add_argument("--budget", type=float, default=5.0)
     analyze.add_argument("--bootstrap", type=int, default=1000, help="tirages du bootstrap")
     analyze.add_argument("--no-ablation", action="store_true", help="sauter l'ablation (plus rapide)")
+    trainer = sub.add_parser("train-predictor", help="entraîner et enregistrer le prédicteur utilisé en direct")
+    trainer.add_argument("--target", default="target_h2",
+                         choices=["target_now", "target_h1", "target_h2", "target_h3"])
+    trainer.add_argument("--budget", type=float, default=5.0)
     return parser
 
 
@@ -80,6 +89,15 @@ def main(argv=None):
             print(f"{split} : {manifest['rows']} lignes, {manifest['streams']} flux -> {path}")
             print("  part des cibles à 1 : " + ", ".join(f"{k} {v:.1%}" for k, v in manifest["positive_rate"].items()))
         return 0
+    if args.command == "train-predictor":
+        from .predictor import train_predictor
+        path, info = train_predictor(args.target, args.budget)
+        test = info["test"]
+        print(f"Prédicteur enregistré : {path}")
+        print(f"  cible {info['target']} · seuil d'alarme {info['threshold']:.3f} · {info['n_features']} entrées")
+        print(f"  test : détection {100 * test['detection_rate']:.0f} % · avance sur R1 {test['mean_lead_vs_reactive']:.2f} "
+              f"fenêtre · fausses alarmes {test['false_alarms_per_100_clean_windows']:.1f} / 100")
+        return 0
     if args.command == "analyze":
         from .analysis import run as analyze
         folder, _ = analyze(args.target, args.budget, n_boot=args.bootstrap, ablate=not args.no_ablation)
@@ -96,15 +114,33 @@ def main(argv=None):
     common = dict(n_windows=args.windows, onset=args.onset, ramp=args.ramp, max_intensity=args.intensity)
     if args.command == "run":
         from .service import run_stream
+        predictor = None
+        if args.predict or args.predictor:
+            from .predictor import DEFAULT_PREDICTOR, load_predictor
+            predictor = load_predictor(args.predictor or DEFAULT_PREDICTOR)
         summary = run_stream(StreamSpec(args.scenario, args.seed, **common),
-                             label_delay=args.label_delay, persistence=args.persistence)
-        severity = {a["window_id"]: a["severity"] for a in summary["alerts"]}
+                             label_delay=args.label_delay, persistence=args.persistence, predictor=predictor)
+        confirmed = {a["window_id"]: a for a in summary["alerts"]}
+        predicted = {a["window_id"]: a for a in summary["predictive_alerts"]}
+        risks = {r["window"]: r["risk"] for r in summary["risk_timeline"]}
         for row in summary["timeline"]:
-            mark = f"ALERTE ({severity[row['window']]})" if row["window"] in severity else ""
+            window = row["window"]
             loss = "en attente" if row["log_loss"] is None else f"{row['log_loss']:.3f}"
-            print(f"{row['window']}  log loss {loss:>10}  {mark}")
+            marks = []
+            if window in predicted:
+                marks.append(f"ALERTE PRÉDICTIVE (pas {predicted[window]['detected_at_step']})")
+            if window in confirmed:
+                marks.append(f"ALERTE CONFIRMÉE {confirmed[window]['severity']} (pas {confirmed[window]['detected_at_step']})")
+            risk = f"  risque {risks[window]:.2f}" if window in risks else ""
+            print(f"{window}  log loss {loss:>10}{risk}  {' · '.join(marks)}")
         print(json.dumps({k: summary[k] for k in ("run_dir", "first_alert_window", "first_alert_step", "episodes")},
                          ensure_ascii=False, indent=2))
+        for alert in summary["predictive_alerts"]:
+            signals = ", ".join(f"{s['signal']} = {s['value']:.3f} (habituel {s['usual_value']:.3f})"
+                                for s in alert["top_signals"] if s["value"] is not None)
+            lead = f", {alert['lead_steps']} pas avant l'alerte confirmée" if alert.get("lead_steps") is not None else ""
+            print(f"Alerte prédictive {alert['window_id']} : risque {alert['risk']:.2f}, statut {alert['status']}{lead}")
+            print(f"  signaux : {signals}")
         if args.investigate and summary["episodes"]:
             from mlops_churn.agent import investigate
             from .service import DEFAULT_REFERENCE

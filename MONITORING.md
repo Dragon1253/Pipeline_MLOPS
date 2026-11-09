@@ -347,7 +347,69 @@ Pour le data drift et la corruption, le risque reste élevé même sans ces troi
 beaucoup d'autres signaux concordent. L'explication désigne des signaux, jamais une cause ;
 le diagnostic reste le travail de l'agent d'analyse.
 
+### 2.5 Alerte prédictive en direct (`monitoring/predictor.py`, `service.py`)
+
+Le modèle retenu (M2, cible `target_h2`) est entraîné une fois puis utilisé fenêtre par
+fenêtre par le monitoring, à côté de l'alerte confirmée de l'étape 1.
+
+```powershell
+# Une fois : entraîner et enregistrer le prédicteur (monitoring_runs/predictor/predictor.joblib)
+.\.venv\Scripts\python.exe -m monitoring train-predictor
+
+# Un flux avec le risque prédit et les alertes prédictives
+.\.venv\Scripts\python.exe -m monitoring run --scenario data_corruption --seed 7 --label-delay 2 --predict
+```
+
+À chaque fenêtre : les entrées sont calculées **exactement** comme dans le jeu de données
+(fonction partagée `dataset.window_features`, vérifié par un test à 10⁻¹² près), puis le
+risque de dégradation dans les 2 prochaines fenêtres. Événements émis : `risk_recorded`,
+`predictive_alert`, `predictive_alert_closed` (en plus de `metric_recorded` et `alert_triggered`).
+
+Exemple (corruption, début en w008, labels en retard de 2 fenêtres) :
+
+```text
+w006  log loss 0.543  risque 0.30  ALERTE CONFIRMÉE warning (pas 8)      ← fluctuation
+w007  log loss 0.499  risque 0.29
+w008  log loss 7.041  risque 1.00  ALERTE PRÉDICTIVE (pas 8) · ALERTE CONFIRMÉE critical (pas 10)
+Alerte prédictive w008 : risque 1.00, statut confirmed, 2 pas avant l'alerte confirmée
+  signaux : sig_out_of_range_monthly_charges = 0.276 (habituel 0.000), sig_share_extreme = 0.270 (habituel 0.006)
+```
+
+#### Règles de l'alerte prédictive
+
+| Situation | Décision |
+| --- | --- |
+| Risque ≥ seuil du prédicteur | Alerte `predictive` : risque, horizon, signaux désignés, dernière fenêtre étiquetée |
+| Une alerte confirmée porte sur une fenêtre de l'intervalle annoncé (fenêtre prédite … + 2) | Statut `confirmed`, avance mesurée ; l'`alert.json` confirmé contient `preceded_by_predictive_alert` |
+| Labels de tout l'intervalle arrivés sans confirmation | Statut `expired` (ou `during_open_incident` si un incident était déjà ouvert : rappel de vigilance) |
+| Risque retombé sous le seuil 2 fenêtres de suite | Statut `not_confirmed` |
+| Incident **critique** déjà confirmé et ouvert | Pas d'alerte prédictive (inutile) |
+| Alerte prédictive émise il y a ≤ 2 fenêtres | Pas de nouvelle alerte (pas de doublon) |
+
+Une alerte `warning` ouverte (souvent une fluctuation) ne bloque **pas** l'alerte prédictive :
+sinon une fluctuation masquerait le vrai incident, comme à l'étape 1. Une prédiction expirée
+ne peut plus être reliée à un incident ultérieur.
+
+#### Transmission dans le workflow
+
+* **Vigilance** : chaque alerte prédictive est écrite dans
+  `monitoring_runs/<run>/predictive_alerts/<alert_id>.json` (sans labels ni cause).
+* **Enquête** : l'agent d'analyse reste déclenché par l'alerte confirmée, car il a besoin de
+  `feedback.csv`. Son `alert.json` indique l'alerte prédictive qui l'a précédée (fenêtre,
+  risque, avance, signaux) ; `monitoring_context.json` contient le risque de chaque fenêtre
+  et toutes les alertes prédictives.
+
+#### Bilan sur 40 flux par scénario (début en w008, montée sur 4 fenêtres, labels en retard de 2)
+
+| Scénario | Incidents annoncés par une alerte prédictive | Avance moyenne sur l'alerte confirmée |
+| --- | --- | --- |
+| Corruption | 39 / 40 | 2,1 pas |
+| Data drift | 40 / 40 | 2,4 pas |
+| Régression de déploiement | 39 / 40 | 2,1 pas |
+| Concept drift | 1 / 40 | — (invisible sans labels, attendu) |
+| Flux normaux | — | 35 alertes prédictives sur 800 fenêtres (4,4 / 100, budget 5) |
+
 ### Suite prévue
 
-2.5 alerte `predictive` produite en direct par M2 et transmise dans le workflow, avec ses
-signaux désignés ; branchement dans l'interface Sentinel.
+Branchement dans l'interface Sentinel avec la personne de l'agent d'analyse : courbe du
+risque à côté de la log loss, alertes `predictive`, `warning` et `critical`, puis enquête.

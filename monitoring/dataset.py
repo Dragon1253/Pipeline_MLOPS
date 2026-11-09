@@ -73,6 +73,27 @@ def _slope(values):
     return float(np.polyfit(np.arange(len(values)), values, 1)[0])
 
 
+def window_features(index, signals, known_events, label_delay, threshold):
+    """Entrées de la fenêtre ``index`` : signaux sans labels + métriques déjà connues.
+
+    ``known_events`` : fenêtres dont les labels sont arrivés au plus tard au pas ``index``,
+    chacune ``{"window", "metrics"}``. Partagé par le jeu de données et le monitoring en
+    direct, pour que le modèle reçoive en production exactement les entrées apprises.
+    """
+    known = sorted(known_events, key=lambda e: int(e["window"][1:]))
+    recent = known[-3:][::-1]
+    row = {"label_delay": label_delay, **{f"sig_{k}": v for k, v in signals.items()},
+           "known_windows": len(known),
+           "known_last_window_age": index - int(known[-1]["window"][1:]) if known else None}
+    for lag in range(3):
+        row[f"known_log_loss_lag{lag}"] = recent[lag]["metrics"]["log_loss"] if lag < len(recent) else None
+    for name in KNOWN_METRICS[1:]:
+        row[f"known_{name}"] = recent[0]["metrics"][name] if recent else None
+    row["known_log_loss_slope3"] = _slope([e["metrics"]["log_loss"] for e in known[-3:]])
+    row["known_above_threshold_last3"] = sum(e["metrics"]["log_loss"] > threshold for e in known[-3:])
+    return row
+
+
 def stream_rows(config, reference, output_dir, split=""):
     """Simule un flux et le transforme en lignes (une par fenêtre)."""
     spec = StreamSpec(config["scenario"], config["seed"], n_windows=config["n_windows"],
@@ -90,19 +111,9 @@ def stream_rows(config, reference, output_dir, split=""):
     for index, timeline in enumerate(summary["timeline"]):
         window = timeline["window"]
         # Uniquement les labels arrivés au plus tard au pas courant.
-        known = sorted((e for e in recorded if e["step"] <= index), key=lambda e: int(e["window"][1:]))
-        recent = known[-3:][::-1]
+        known = [e for e in recorded if e["step"] <= index]
         row = {"split": split, "stream_id": config["seed"], "window": window, "index": index,
-               "label_delay": config["label_delay"],
-               **{f"sig_{k}": v for k, v in scored[window]["signals"].items()},
-               "known_windows": len(known),
-               "known_last_window_age": index - int(known[-1]["window"][1:]) if known else None}
-        for lag in range(3):
-            row[f"known_log_loss_lag{lag}"] = recent[lag]["metrics"]["log_loss"] if lag < len(recent) else None
-        for name in KNOWN_METRICS[1:]:
-            row[f"known_{name}"] = recent[0]["metrics"][name] if recent else None
-        row["known_log_loss_slope3"] = _slope([e["metrics"]["log_loss"] for e in known[-3:]])
-        row["known_above_threshold_last3"] = sum(e["metrics"]["log_loss"] > threshold for e in known[-3:])
+               **window_features(index, scored[window]["signals"], known, config["label_delay"], threshold)}
         alert = alerts_at.get(index)
         row["react_alert_at_step"] = int(alert is not None)
         row["react_alert_window"] = alert["window_id"] if alert else None
