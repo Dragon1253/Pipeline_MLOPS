@@ -32,3 +32,4 @@ __pycache__/
 .env
 .env.*
 !.env.example
+monitoring_runs/

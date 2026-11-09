@@ -1,0 +1,4 @@
+# Modèles séquentiels du monitoring (GRU, LSTM). Sous Windows, la version PyPI de torch
+# fonctionne sur processeur, sans carte graphique.
+-r requirements.txt
+torch>=2.2,<3
