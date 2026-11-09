@@ -78,6 +78,44 @@ Sur une branche `integration` créée à partir de `agent_investigation`, avec l
 .\.venv\Scripts\python.exe run_full_pipeline.py --scenario data_corruption --orchestrator-mode llm
 ```
 
+## 3 bis. L'interface web
+
+`integration_app.py` lance le même pipeline et l'affiche en direct dans le navigateur :
+log loss et risque prédit fenêtre par fenêtre, alertes confirmées et prédictives, outils
+appelés par l'agent d'analyse, diagnostic, score de confiance, décision de l'orchestrateur,
+action de correction ou revue humaine.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r mlops_correction_agent_groq\requirements-integration.txt
+.\.venv\Scripts\python.exe integration_app.py
+```
+
+Puis ouvrir http://127.0.0.1:8050 . En haut de la page, trois indicateurs montrent si la clé
+NVIDIA, la clé Groq et le prédicteur sont prêts (les clés ne sont jamais affichées). Un seul
+parcours à la fois ; toute erreur s'affiche dans la page.
+
+Clé NVIDIA (analyse réelle) : créer une clé sur https://build.nvidia.com (bouton « Get API
+Key », elle commence par `nvapi-`), copier `.env.example` vers `.env` à la racine et y mettre
+`NVIDIA_API_KEY=nvapi-…`. Ne jamais committer `.env` (déjà ignoré par Git).
+
+## 3 ter. Le flux complet dans Sentinel (interface d'Amen)
+
+`sentinel_app.py` lance l'interface Sentinel (`platform_api/` + `frontend/`) en remplaçant
+uniquement sa fonction `run_incident` : au lieu de rejouer des épisodes figés avec une correction
+de démonstration, chaque scénario lance le vrai flux (monitoring en direct avec alerte prédictive,
+agent d'analyse Nemotron, score de confiance, orchestrateur, agent de correction ou revue humaine).
+C'est l'évolution prévue dans `PLATFORM.md`. Aucun fichier d'Amen n'est modifié ; ses données sont
+rangées dans `monitoring_runs/sentinel` (base séparée de `platform_data/`).
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-platform.txt
+.\.venv\Scripts\python.exe sentinel_app.py                       # orchestrateur à règles
+.\.venv\Scripts\python.exe sentinel_app.py --orchestrator llm     # orchestrateur Groq
+```
+
+Puis ouvrir http://127.0.0.1:8000 et cliquer sur « Lancer un scénario ». Quand l'orchestrateur demande une revue humaine, un panneau « Revue humaine » apparaît dans la page de l'incident avec les boutons Approuver / Refuser ; la décision passe par la logique de `app.py` (inchangé), servie par le même serveur, et le lien de l'e-mail ouvre aussi cette adresse. Il n'est plus nécessaire de lancer `app.py`. L'interface compilée
+(`frontend/dist`, ignorée par Git) se régénère avec `npm ci` puis `npm run build` dans `frontend`.
+
 ## 4. Résultat attendu en mode hors ligne (`fixture`, sans clé)
 
 | Scénario | Monitoring | Analyse (fixture) | Orchestrateur | Correction |
