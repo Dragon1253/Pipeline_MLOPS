@@ -1,0 +1,208 @@
+{
+  "successful_evidence": [
+    {
+      "evidence_id": "E0001",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "alert",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0002",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0003",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "metrics",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0004",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "model_catalog",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0005",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 1250,
+        "limit": 6
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0006",
+      "method": "evaluate_predictions",
+      "arguments": {
+        "predictions": "predictions",
+        "feedback": "feedback",
+        "key": "customer_id",
+        "target": "churn",
+        "probability": "probability",
+        "prediction": "prediction",
+        "group_by": null,
+        "group_resource": null
+      },
+      "quantity": "performance des prédictions existantes avec feedback",
+      "status": "ok",
+      "observations": {
+        "matched_rows": 500,
+        "excluded_missing": 0,
+        "log_loss": 0.5435363482548169
+      }
+    },
+    {
+      "evidence_id": "E0007",
+      "method": "compare_distributions",
+      "arguments": {
+        "left": "source",
+        "right": "reference_clients",
+        "columns": [
+          "tenure_months",
+          "monthly_charges",
+          "support_tickets_3m",
+          "late_payments_12m",
+          "usage_hours_month",
+          "contract_type",
+          "payment_method",
+          "internet_service"
+        ]
+      },
+      "quantity": "distributions marginales des caractéristiques entre populations",
+      "status": "ok",
+      "observations": {
+        "left_rows": 500,
+        "right_rows": 2000,
+        "columns": [
+          {
+            "column": "tenure_months",
+            "test": "KS",
+            "statistic": 0.0670393771705852,
+            "q_value_bh": 0.41380988034704824
+          },
+          {
+            "column": "monthly_charges",
+            "test": "KS",
+            "statistic": 0.05047882773739472,
+            "q_value_bh": 0.4248729504363332
+          },
+          {
+            "column": "support_tickets_3m",
+            "test": "KS",
+            "statistic": 0.052697665502257816,
+            "q_value_bh": 0.4248729504363332
+          },
+          {
+            "column": "late_payments_12m",
+            "test": "KS",
+            "statistic": 0.015632990702808835,
+            "q_value_bh": 0.9999671960156407
+          },
+          {
+            "column": "usage_hours_month",
+            "test": "KS",
+            "statistic": 0.0362878592324901,
+            "q_value_bh": 0.9001087391593252
+          },
+          {
+            "column": "contract_type",
+            "test": "chi2",
+            "total_variation": 0.0447306440561836,
+            "q_value_bh": 0.41380988034704824
+          },
+          {
+            "column": "payment_method",
+            "test": "chi2",
+            "total_variation": 0.015241437000810806,
+            "q_value_bh": 0.9266252270678971
+          },
+          {
+            "column": "internet_service",
+            "test": "chi2",
+            "total_variation": 0.03177984152679558,
+            "q_value_bh": 0.41380988034704824
+          }
+        ]
+      }
+    },
+    {
+      "evidence_id": "E0008",
+      "method": "compare_conditional_relationship",
+      "arguments": {
+        "reference": "reference_clients",
+        "current": "source",
+        "feedback": "feedback",
+        "key": "customer_id",
+        "target": "churn",
+        "columns": null,
+        "folds": 5,
+        "seed": 42
+      },
+      "quantity": "relation conditionnelle cible/caractéristiques entre périodes",
+      "status": "ok",
+      "observations": {
+        "features": [
+          "tenure_months",
+          "monthly_charges",
+          "support_tickets_3m",
+          "late_payments_12m",
+          "usage_hours_month",
+          "contract_type",
+          "payment_method",
+          "internet_service"
+        ],
+        "reference_rows": 2000,
+        "current_rows": 500,
+        "excluded_labels": 0,
+        "likelihood_ratio": {
+          "statistic": 21.245517581413576,
+          "degrees_of_freedom": 20,
+          "p_value": 0.38281037313910177,
+          "rank_shared": 20,
+          "rank_alternative": 40
+        },
+        "cross_validation": {
+          "folds": 5,
+          "loss_gain": -0.012220478174792104,
+          "positive_gain_folds": 1
+        }
+      }
+    }
+  ],
+  "failed_or_cached_operations": []
+}

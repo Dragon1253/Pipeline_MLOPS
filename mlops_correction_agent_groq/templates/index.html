@@ -4,186 +4,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MLOps Correction Agent</title>
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <title>MLOps | Multi-Agent Control Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <main class="container">
-        <header>
-            <p class="eyebrow">MLOps • LangGraph • Groq</p>
-            <h1>Correction Agent</h1>
-            <p>Scénario S3 — Détection signalée de données corrompues</p>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">M</div>
+            <div>
+                <strong>MLOps Studio</strong>
+                <small>Multi-Agent System</small>
+            </div>
+        </div>
+
+        <div class="sidebar-label">WORKSPACE</div>
+        <nav>
+            <a href="#overview" class="active">◈ &nbsp; Overview</a>
+            <a href="#investigation">◎ &nbsp; Investigation</a>
+            <a href="#correction">◇ &nbsp; Correction</a>
+            <a href="#review">✓ &nbsp; Human Review</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <span class="status-dot"></span>
+            Local Development
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">MLOPS / AGENT OPERATIONS</div>
+                <h1 id="overview">Multi-Agent Control Center</h1>
+                <p>Investigation, corrective action and human oversight.</p>
+            </div>
+            <span class="environment">● Development Environment</span>
         </header>
 
-        <section class="card">
-            <h2>Nouvel incident</h2>
-            <form method="POST" action="{{ url_for('analyze') }}">
-                <label>Identifiant du lot</label>
-                <input name="batch_id" value="BATCH-S3-001"
-                       maxlength="80" required>
-
-                <label>Valeurs manquantes (%)</label>
-                <input type="number" name="missing_rate"
-                       value="35" min="0" max="100" step="0.1" required>
-
-                <label>Température maximale (°C)</label>
-                <input type="number" name="temperature_max"
-                       value="110" step="0.1" required>
-
-                <label>Confiance du diagnostic (0 à 1)</label>
-                <input type="number" name="confidence"
-                       value="0.95" min="0" max="1"
-                       step="0.01" required>
-
-                <button type="submit" class="primary">
-                    Analyser avec Groq
-                </button>
-            </form>
+        <section class="workflow">
+            <div class="workflow-step">
+                <span class="step-number">01</span>
+                <strong>Investigation Agent</strong>
+                <small>NVIDIA</small>
+            </div>
+            <span class="connector">→</span>
+            <div class="workflow-step">
+                <span class="step-number">02</span>
+                <strong>Correction Agent</strong>
+                <small>Groq · LangGraph</small>
+            </div>
+            <span class="connector">→</span>
+            <div class="workflow-step">
+                <span class="step-number">03</span>
+                <strong>Safety Guardrails</strong>
+                <small>Policy Validation</small>
+            </div>
+            <span class="connector">→</span>
+            <div class="workflow-step">
+                <span class="step-number">04</span>
+                <strong>Human Review</strong>
+                <small>Approval Required</small>
+            </div>
         </section>
-        
-<section class="card">
-    <h2>Intégration — Agent d'Amen</h2>
 
-    <p>
-        Colle un diagnostic JSON produit par l'agent
-        d'investigation. Il sera transmis à l'agent
-        de correction Groq.
-    </p>
+        <div class="content-grid">
+            <section class="panel" id="investigation">
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">AUTOMATED WORKFLOW</div>
+                        <h2>Investigation Agent</h2>
+                        <p>Analyze an incident using NVIDIA and forward the diagnosis to the correction agent.</p>
+                    </div>
+                    <span class="tag purple">NVIDIA</span>
+                </div>
 
-    <form method="POST"
-          action="{{ url_for('analyze_amen') }}">
+                <form method="POST" action="{{ url_for('run_amen') }}">
+                    <label for="episode">Select episode</label>
+                    <select name="episode" id="episode">
+                        {% for i in range(1, 6) %}
+                        <option value="episode-{{ '%03d'|format(i) }}"
+                            {% if i == 3 %}selected{% endif %}>
+                            Episode {{ '%03d'|format(i) }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        Run Investigation + Correction →
+                    </button>
+                </form>
+            </section>
 
-        <label for="diagnosis_json">
-            Diagnostic d'investigation (JSON)
-        </label>
+            <section class="panel" id="correction">
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">MANUAL TESTING</div>
+                        <h2>Correction Agent</h2>
+                        <p>Simulate a data-quality incident and test Groq's corrective decision.</p>
+                    </div>
+                    <span class="tag blue">GROQ</span>
+                </div>
 
-        <textarea
-            id="diagnosis_json"
-            name="diagnosis_json"
-            rows="12"
-            required
-            style="width:100%;padding:14px;
-                   border:1px solid #cbd5e1;
-                   border-radius:9px;"
-        >{
+                <form method="POST" action="{{ url_for('analyze') }}">
+                    <label>Batch ID</label>
+                    <input name="batch_id" value="BATCH-S3-001" required>
+
+                    <div class="two-cols">
+                        <div>
+                            <label>Missing values (%)</label>
+                            <input type="number" name="missing_rate" value="35" step="0.1" required>
+                        </div>
+                        <div>
+                            <label>Max temperature (°C)</label>
+                            <input type="number" name="temperature_max" value="110" step="0.1" required>
+                        </div>
+                    </div>
+
+                    <label>Diagnostic confidence</label>
+                    <input type="number" name="confidence" value="0.95"
+                           min="0" max="1" step="0.01" required>
+
+                    <button type="submit" class="btn btn-secondary">
+                        Analyze with Groq →
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <div class="eyebrow">MANUAL INTEGRATION</div>
+                    <h2>Import Investigation JSON</h2>
+                    <p>Paste a diagnostic payload to test the integration without calling NVIDIA.</p>
+                </div>
+                <span class="tag neutral">JSON</span>
+            </div>
+
+            <form method="POST" action="{{ url_for('analyze_amen') }}">
+                <textarea name="diagnosis_json" rows="6" spellcheck="false">{
   "cause_probable": "data_corruption",
   "resume": "Des valeurs incoherentes ont ete detectees.",
   "preuves": ["E0001", "E0002"]
 }</textarea>
-
-        <button type="submit" class="primary">
-            Envoyer à mon agent de correction
-        </button>
-    </form>
-</section>
-
-<section class="card">
-    <h2>Investigation automatique — Agent Amen</h2>
-
-    <p>
-        Exécuter l'investigation NVIDIA puis transmettre
-        le diagnostic à l'agent Groq.
-    </p>
-
-    <form method="POST" action="{{ url_for('run_amen') }}">
-        <label>Épisode à analyser</label>
-
-        <select name="episode">
-            <option value="episode-001">Episode 001</option>
-            <option value="episode-002">Episode 002</option>
-            <option value="episode-003" selected>Episode 003</option>
-            <option value="episode-004">Episode 004</option>
-            <option value="episode-005">Episode 005</option>
-        </select>
-
-        <button type="submit" class="primary">
-            Lancer Amen + Groq
-        </button>
-    </form>
-</section>
-
+                <button type="submit" class="btn btn-secondary">
+                    Send to Correction Agent →
+                </button>
+            </form>
+        </section>
 
         {% if report %}
-        <section class="card">
-            <h2>Résultat de l'analyse</h2>
+        {% set amen = report.get('amen_diagnosis') or {} %}
+        {% set diagnosis = amen.get('final_diagnosis') or amen %}
 
-            <div class="metric">
-                <span>Incident</span>
-                <strong>{{ report.incident.incident_id }}</strong>
+        <section class="results" id="results">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">LATEST EXECUTION</div>
+                    <h2>Analysis Results</h2>
+                </div>
+                <span class="tag neutral">{{ report.timestamp or 'Latest run' }}</span>
             </div>
 
-            <div class="metric">
-                <span>Proposition Groq</span>
-                <strong>{{ report.proposed_action }}</strong>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <small>Incident ID</small>
+                    <strong>{{ report.incident.incident_id }}</strong>
+                </div>
+                <div class="metric-card">
+                    <small>Proposed Action</small>
+                    <strong>{{ report.proposed_action }}</strong>
+                </div>
+                <div class="metric-card">
+                    <small>Final Decision</small>
+                    <strong>{{ report.final_action }}</strong>
+                </div>
+                <div class="metric-card">
+                    <small>Production Status</small>
+                    <strong>
+                        {% if report.tool_result.get('production_unchanged', True) %}
+                            Unchanged
+                        {% else %}
+                            Check required
+                        {% endif %}
+                    </strong>
+                </div>
             </div>
 
-            <div class="metric">
-                <span>Décision finale</span>
-                <strong>{{ report.final_action }}</strong>
-            </div>
+            {% if amen %}
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">ROOT CAUSE ANALYSIS</div>
+                        <h2>Investigation Report</h2>
+                    </div>
+                    <span class="tag purple">NVIDIA</span>
+                </div>
 
-            <div class="metric">
-                <span>Garde-fou accepté</span>
-                <strong>{{ report.guard.accepted }}</strong>
-            </div>
+                <div class="detail-row">
+                    <span>Status</span>
+                    <strong>{{ amen.get('status', 'completed') }}</strong>
+                </div>
 
-            <div class="metric">
-                <span>Statut de l'outil</span>
-                <strong>{{ report.tool_result.status }}</strong>
-            </div>
+                <div class="detail-row">
+                    <span>Probable Cause</span>
+                    <strong>{{ diagnosis.get('cause_probable', 'Unknown') }}</strong>
+                </div>
 
-            <div class="metric">
-                <span>Production inchangée</span>
-                <strong>{{ report.verification.production_unchanged }}</strong>
-            </div>
+                <h3>Diagnostic Summary</h3>
+                <p class="summary">
+                    {{ diagnosis.get('resume', 'No summary available') }}
+                </p>
 
-{% if report.final_action == "human_review" %}
-    <p class="notice">
-        Le garde-fou a bloqué l'action proposée.
-        Une validation humaine est nécessaire.
-        Aucune correction n'a été exécutée.
-    </p>
-{% elif report.final_action == "quarantine_batch" %}
-    <p class="notice">
-        La mise en quarantaine a été simulée.
-        Aucun lot réel n'a été déplacé.
-    </p>
-{% else %}
-    <p class="notice">
-        Action : {{ report.final_action }}.
-        Consultez le statut avant toute intervention.
-    </p>
-{% endif %}
+                <h3>Evidence</h3>
+                <div class="evidence-list">
+                    {% for proof in diagnosis.get('preuves', []) %}
+                        <span class="evidence">{{ proof }}</span>
+                    {% else %}
+                        <span>No evidence available</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <div class="eyebrow">DECISION ENGINE</div>
+                        <h2>Correction & Safety</h2>
+                    </div>
+                    <span class="tag blue">LANGGRAPH</span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Groq proposal</span>
+                    <strong>{{ report.proposed_action }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Final action</span>
+                    <strong>{{ report.final_action }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Guardrail accepted</span>
+                    <strong>{{ report.guard.get('accepted', 'Unknown') }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Tool status</span>
+                    <strong>{{ report.tool_result.get('status', 'Unknown') }}</strong>
+                </div>
+
+                {% if report.final_action == 'human_review' %}
+                <div class="notice">
+                    The proposed action was blocked by safety guardrails.
+                    Human review is required. No correction has been executed.
+                </div>
+                {% else %}
+                <div class="notice">
+                    The corrective workflow has been evaluated.
+                    Review the execution status before any production change.
+                </div>
+                {% endif %}
+            </div>
         </section>
 
-        <section class="card">
-            <h2>Validation humaine</h2>
+        <section class="panel" id="review">
+            <div class="panel-heading">
+                <div>
+                    <div class="eyebrow">HUMAN IN THE LOOP</div>
+                    <h2>Human Review</h2>
+                    <p>Record a decision after examining the investigation and correction reports.</p>
+                </div>
+                <span class="tag neutral">REVIEW</span>
+            </div>
 
             {% if report.human_decision %}
-                <p class="success">
-                    Décision enregistrée :
-                    {{ report.human_decision }}
-                </p>
-            {% else %}
-                <p>Choisis une action après avoir examiné le rapport.</p>
-
-                <form method="POST" action="{{ url_for('decision') }}"
-                      class="decision-form">
-                    <button type="submit" name="choice" value="approve">
-                        Approuver
-                    </button>
-                    <button type="submit" name="choice" value="investigate">
-                        Demander investigation
-                    </button>
-                    <button type="submit" name="choice" value="reject"
-                            class="danger">
-                        Refuser
-                    </button>
-                </form>
+            <div class="notice">
+                Recorded decision: {{ report.human_decision }}
+            </div>
             {% endif %}
+
+            <form method="POST" action="{{ url_for('decision') }}" class="review-actions">
+                <button type="submit" name="choice" value="approve" class="btn btn-approve">
+                    Approve
+                </button>
+                <button type="submit" name="choice" value="investigate" class="btn btn-secondary">
+                    Request Investigation
+                </button>
+                <button type="submit" name="choice" value="reject" class="btn btn-reject">
+                    Reject
+                </button>
+            </form>
         </section>
         {% endif %}
+
+        <footer>
+            MLOps Multi-Agent Control Center · Development Prototype
+        </footer>
     </main>
+</div>
 </body>
 </html>

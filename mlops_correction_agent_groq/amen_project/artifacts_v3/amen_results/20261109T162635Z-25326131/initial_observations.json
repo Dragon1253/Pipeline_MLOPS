@@ -1,0 +1,131 @@
+{
+  "evidence_id": "E0000",
+  "origin": "observations fournies à l’ouverture de l’incident",
+  "alert": {
+    "alert_id": "episode-005-focus-alert",
+    "window_id": "episode-005-focus",
+    "metric": "log_loss",
+    "observed_value": 0.5435363482548169,
+    "direction": "higher_is_worse",
+    "reference_value": 0.506686987886057,
+    "threshold": 0.5412309701555961,
+    "labeled_rows": 500
+  },
+  "resources": [
+    {
+      "id": "source",
+      "container_path": "/data/data/source.csv",
+      "kind": "csv",
+      "description": "Capture source avant les transformations de la fenêtre.",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ]
+    },
+    {
+      "id": "inputs",
+      "container_path": "/data/data/inputs.csv",
+      "kind": "csv",
+      "description": "Données effectivement reçues par le modèle.",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ]
+    },
+    {
+      "id": "predictions",
+      "container_path": "/data/data/predictions.csv",
+      "kind": "csv",
+      "description": "Prédictions et version servie.",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "probability",
+        "prediction",
+        "model_version"
+      ]
+    },
+    {
+      "id": "feedback",
+      "container_path": "/data/data/feedback.csv",
+      "kind": "csv",
+      "description": "Résultats réels disponibles au moment de cette investigation.",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "churn"
+      ]
+    },
+    {
+      "id": "alert",
+      "container_path": "/data/data/alert.json",
+      "kind": "json",
+      "description": "Observations publiques : alert"
+    },
+    {
+      "id": "context",
+      "container_path": "/data/data/context.json",
+      "kind": "json",
+      "description": "Observations publiques : context"
+    },
+    {
+      "id": "metrics",
+      "container_path": "/data/data/metrics.json",
+      "kind": "json",
+      "description": "Métriques et alerte de la fenêtre courante."
+    },
+    {
+      "id": "reference_clients",
+      "container_path": "/data/data/reference_clients.csv",
+      "kind": "csv",
+      "description": "Population de référence indépendante.",
+      "rows": 2000,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service",
+        "churn"
+      ]
+    },
+    {
+      "id": "confirmation_1_metrics",
+      "container_path": "/data/data/confirmation_1_metrics.json",
+      "kind": "json",
+      "description": "Métriques de confirmation déjà disponibles."
+    },
+    {
+      "id": "confirmation_2_metrics",
+      "container_path": "/data/data/confirmation_2_metrics.json",
+      "kind": "json",
+      "description": "Métriques de confirmation déjà disponibles."
+    },
+    {
+      "id": "model_catalog",
+      "container_path": "/data/data/model_catalog.json",
+      "kind": "json",
+      "description": "Identifiants des modèles locaux disponibles pour une comparaison sur les mêmes observations."
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "successful_evidence": [
+    {
+      "evidence_id": "E0001",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "alert",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0002",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0003",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "metrics",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0004",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "model_catalog",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0005",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "predictions",
+        "columns": null,
+        "offset": 0,
+        "limit": 20
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0006",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "source",
+        "columns": null,
+        "offset": 0,
+        "limit": 8
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0007",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "inputs",
+        "columns": null,
+        "offset": 0,
+        "limit": 8
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0008",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 1250,
+        "limit": 10
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    }
+  ],
+  "failed_or_cached_operations": []
+}

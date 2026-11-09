@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "resources": [
+    {
+      "id": "source",
+      "file": "data/source.csv",
+      "container_path": "/data/data/source.csv",
+      "kind": "csv",
+      "description": "Capture source avant les transformations de la fenêtre.",
+      "sha256": "a31f81c69d443a0c1c5e16acc5bb1a2bbfee6706b37681aaa1f72ffb635bfb1c",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ],
+      "dtypes": {
+        "customer_id": "object",
+        "tenure_months": "float64",
+        "monthly_charges": "float64",
+        "support_tickets_3m": "float64",
+        "late_payments_12m": "float64",
+        "usage_hours_month": "float64",
+        "contract_type": "object",
+        "payment_method": "object",
+        "internet_service": "object"
+      }
+    },
+    {
+      "id": "inputs",
+      "file": "data/inputs.csv",
+      "container_path": "/data/data/inputs.csv",
+      "kind": "csv",
+      "description": "Données effectivement reçues par le modèle.",
+      "sha256": "a31f81c69d443a0c1c5e16acc5bb1a2bbfee6706b37681aaa1f72ffb635bfb1c",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ],
+      "dtypes": {
+        "customer_id": "object",
+        "tenure_months": "float64",
+        "monthly_charges": "float64",
+        "support_tickets_3m": "float64",
+        "late_payments_12m": "float64",
+        "usage_hours_month": "float64",
+        "contract_type": "object",
+        "payment_method": "object",
+        "internet_service": "object"
+      }
+    },
+    {
+      "id": "predictions",
+      "file": "data/predictions.csv",
+      "container_path": "/data/data/predictions.csv",
+      "kind": "csv",
+      "description": "Prédictions et version servie.",
+      "sha256": "6b1d29984a3bc36a65fba2e23a9f6b526c21b3aefddf202299d594f0f0ace363",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "probability",
+        "prediction",
+        "model_version"
+      ],
+      "dtypes": {
+        "customer_id": "object",
+        "probability": "float64",
+        "prediction": "int64",
+        "model_version": "object"
+      }
+    },
+    {
+      "id": "feedback",
+      "file": "data/feedback.csv",
+      "container_path": "/data/data/feedback.csv",
+      "kind": "csv",
+      "description": "Résultats réels disponibles au moment de cette investigation.",
+      "sha256": "fb5355d3368633069876de5e7bded192df3567776010381c03a9b0c023c5f5e6",
+      "rows": 500,
+      "columns": [
+        "customer_id",
+        "churn"
+      ],
+      "dtypes": {
+        "customer_id": "object",
+        "churn": "int64"
+      }
+    },
+    {
+      "id": "alert",
+      "file": "data/alert.json",
+      "container_path": "/data/data/alert.json",
+      "kind": "json",
+      "description": "Observations publiques : alert",
+      "sha256": "8b5771bac1494ea018a53ac260738a435b5e03d884308bafd6ab5e451d4ededd"
+    },
+    {
+      "id": "context",
+      "file": "data/context.json",
+      "container_path": "/data/data/context.json",
+      "kind": "json",
+      "description": "Observations publiques : context",
+      "sha256": "84a46e895e4cae2497c28b98222af416b7393603006f3917d9e29dcaa028aa5c"
+    },
+    {
+      "id": "metrics",
+      "file": "data/metrics.json",
+      "container_path": "/data/data/metrics.json",
+      "kind": "json",
+      "description": "Métriques et alerte de la fenêtre courante.",
+      "sha256": "1e141206177818efe3da55522470560d66fe45a5b777b016e785695667c3f2ef"
+    },
+    {
+      "id": "reference_clients",
+      "file": "data/reference_clients.csv",
+      "container_path": "/data/data/reference_clients.csv",
+      "kind": "csv",
+      "description": "Population de référence indépendante.",
+      "sha256": "49991f66aecd53fc76f2f4641b29bfca4c5a814c7cf35415af5e441c8aa601ed",
+      "rows": 2000,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service",
+        "churn"
+      ],
+      "dtypes": {
+        "customer_id": "object",
+        "tenure_months": "float64",
+        "monthly_charges": "float64",
+        "support_tickets_3m": "float64",
+        "late_payments_12m": "float64",
+        "usage_hours_month": "float64",
+        "contract_type": "object",
+        "payment_method": "object",
+        "internet_service": "object",
+        "churn": "int64"
+      }
+    },
+    {
+      "id": "confirmation_1_metrics",
+      "file": "data/confirmation_1_metrics.json",
+      "container_path": "/data/data/confirmation_1_metrics.json",
+      "kind": "json",
+      "description": "Métriques de confirmation déjà disponibles.",
+      "sha256": "4d8e3ee5f096e52328475b6a2f0539409f20cbaa1faaadd42d87d32c4780d705"
+    },
+    {
+      "id": "confirmation_2_metrics",
+      "file": "data/confirmation_2_metrics.json",
+      "container_path": "/data/data/confirmation_2_metrics.json",
+      "kind": "json",
+      "description": "Métriques de confirmation déjà disponibles.",
+      "sha256": "f7da7983d347d8e50cb46f37845ae3f3494bd318334762bcfff144acc58d8d75"
+    },
+    {
+      "id": "model_catalog",
+      "file": "data/model_catalog.json",
+      "container_path": "/data/data/model_catalog.json",
+      "kind": "json",
+      "description": "Identifiants des modèles locaux disponibles pour une comparaison sur les mêmes observations.",
+      "sha256": "2bf6665018d889ea67dbffeae50f96ccbe63da79e919f9876c3ea75ac6614630"
+    }
+  ],
+  "feedback_policy": "Instant d’investigation après réception des confirmations de cet épisode."
+}

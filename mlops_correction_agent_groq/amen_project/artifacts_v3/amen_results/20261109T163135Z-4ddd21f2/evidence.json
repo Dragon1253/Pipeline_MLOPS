@@ -1,0 +1,492 @@
+[
+  {
+    "evidence_id": "E0001",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "alert",
+      "columns": null,
+      "offset": 0,
+      "limit": 5
+    },
+    "created_at": "2026-11-09T16:31:38.741123+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "alert",
+      "text": "{\n  \"alert_id\": \"episode-003-focus-alert\",\n  \"window_id\": \"episode-003-focus\",\n  \"metric\": \"log_loss\",\n  \"observed_value\": 25.227651317516923,\n  \"direction\": \"higher_is_worse\",\n  \"reference_value\": 0.506686987886057,\n  \"threshold\": 0.5412309701555961,\n  \"labeled_rows\": 500\n}",
+      "offset_unit": "characters",
+      "next_offset": null,
+      "sha256": "e013672460c3e936f6ce0620fb43264eeaec9bd2a7232ffa7dbdea3698f4baca"
+    },
+    "duration_seconds": 0.045999999972991645
+  },
+  {
+    "evidence_id": "E0002",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "context",
+      "columns": null,
+      "offset": 0,
+      "limit": 5
+    },
+    "created_at": "2026-11-09T16:31:38.744118+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "context",
+      "text": "{\n  \"episode_id\": \"episode-003\",\n  \"threshold\": 0.5412309701555961,\n  \"performance_history\": [\n    {\n      \"window\": \"focus\",\n      \"metrics\": {\n        \"log_loss\": 25.227651317516923,\n        \"accuracy\": 0.288,\n        \"precision\": 0.2691511387163561,\n        \"recall\": 0.9774436090225563,\n        \"f1\": 0.42207792207792205,\n        \"roc_auc\": 0.5041691422015528,\n        \"average_precision\": 0.26761798714124124,\n        \"confusion_matrix\": [\n          [\n            14,\n            353\n          ],\n          [\n            3,\n            130\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": true\n    },\n    {\n      \"window\": \"confirmation-1\",\n      \"metrics\": {\n        \"log_loss\": 23.908993914968622,\n        \"accuracy\": 0.328,\n        \"precision\": 0.3148148148148148,\n        \"recall\": 0.9807692307692307,\n        \"f1\": 0.4766355140186916,\n        \"roc_auc\": 0.5043604651162791,\n        \"average_precision\": 0.31392860009465506,\n        \"confusion_matrix\": [\n          [\n            11,\n            333\n          ],\n          [\n            3,\n            153\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": true\n    },\n    {\n      \"window\": \"confirmation-2\",\n      \"metrics\": {\n        \"log_loss\"",
+      "offset_unit": "characters",
+      "next_offset": 1250,
+      "sha256": "a8307112713e10e2290e326b3594ecec57b402b7bc841b7e8eb423d5dc81bdb4"
+    },
+    "duration_seconds": 0.045999999972991645
+  },
+  {
+    "evidence_id": "E0003",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "metrics",
+      "columns": null,
+      "offset": 0,
+      "limit": 5
+    },
+    "created_at": "2026-11-09T16:31:38.746122+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "metrics",
+      "text": "{\n  \"metrics\": {\n    \"log_loss\": 25.227651317516923,\n    \"accuracy\": 0.288,\n    \"precision\": 0.2691511387163561,\n    \"recall\": 0.9774436090225563,\n    \"f1\": 0.42207792207792205,\n    \"roc_auc\": 0.5041691422015528,\n    \"average_precision\": 0.26761798714124124,\n    \"confusion_matrix\": [\n      [\n        14,\n        353\n      ],\n      [\n        3,\n        130\n      ]\n    ]\n  },\n  \"labeled_rows\": 500,\n  \"status\": \"alert\",\n  \"alert\": {\n    \"alert_id\": \"episode-003-focus-alert\",\n    \"window_id\": \"episode-003-focus\",\n    \"metric\": \"log_loss\",\n    \"observed_value\": 25.227651317516923,\n    \"direction\": \"higher_is_worse\",\n    \"reference_value\": 0.506686987886057,\n    \"threshold\": 0.5412309701555961,\n    \"labeled_rows\": 500\n  }\n}",
+      "offset_unit": "characters",
+      "next_offset": null,
+      "sha256": "f85bfc227bf84955ec0d6aa1226f0996de734ef328c2e96bc55785836f10bfab"
+    },
+    "duration_seconds": 0.046999999962281436
+  },
+  {
+    "evidence_id": "E0004",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "model_catalog",
+      "columns": null,
+      "offset": 0,
+      "limit": 5
+    },
+    "created_at": "2026-11-09T16:31:38.751008+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "model_catalog",
+      "text": "{\n  \"models\": [\n    {\n      \"id\": \"reference_model\",\n      \"version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\"\n    },\n    {\n      \"id\": \"active_model\",\n      \"version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\"\n    }\n  ],\n  \"execution\": \"Inférence locale en lecture seule via compare_model_versions ; binaires non transmis au LLM.\"\n}",
+      "offset_unit": "characters",
+      "next_offset": null,
+      "sha256": "2bf6665018d889ea67dbffeae50f96ccbe63da79e919f9876c3ea75ac6614630"
+    },
+    "duration_seconds": 0.046999999962281436
+  },
+  {
+    "evidence_id": "E0005",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "predictions",
+      "columns": null,
+      "offset": 0,
+      "limit": 20
+    },
+    "created_at": "2026-11-09T16:31:47.866924+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "predictions",
+      "sha256": "d3b35648c29ad6d2b71736489c948c250d3b792dc9e72fc76e80e0ebcf123cbf",
+      "total_rows": 500,
+      "offset": 0,
+      "returned_rows": 20,
+      "columns": [
+        "customer_id",
+        "probability",
+        "prediction",
+        "model_version"
+      ],
+      "records": [
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00000",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00001",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00002",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00003",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00004",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00005",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00006",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00007",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00008",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00009",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00010",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00011",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00012",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00013",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00014",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00015",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00016",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00017",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00018",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00019",
+          "probability": 1.0,
+          "prediction": 1,
+          "model_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+        }
+      ]
+    },
+    "duration_seconds": 0.061999999976251274
+  },
+  {
+    "evidence_id": "E0006",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "source",
+      "columns": null,
+      "offset": 0,
+      "limit": 8
+    },
+    "created_at": "2026-11-09T16:31:47.867923+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "source",
+      "sha256": "54256067163cbe8e2baade94e3a964903daf2471c9eacb82ceb280fbc1a5427f",
+      "total_rows": 500,
+      "offset": 0,
+      "returned_rows": 8,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ],
+      "records": [
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00000",
+          "tenure_months": 41.0,
+          "monthly_charges": 75.23,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 2.0,
+          "usage_hours_month": 65.26,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00001",
+          "tenure_months": 38.0,
+          "monthly_charges": 62.94,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 0.0,
+          "usage_hours_month": 49.96,
+          "contract_type": "annual",
+          "payment_method": "manual",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00002",
+          "tenure_months": 40.0,
+          "monthly_charges": 50.93,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 4.0,
+          "usage_hours_month": 30.28,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00003",
+          "tenure_months": 12.0,
+          "monthly_charges": 95.67,
+          "support_tickets_3m": 0.0,
+          "late_payments_12m": 0.0,
+          "usage_hours_month": 64.09,
+          "contract_type": "two_year",
+          "payment_method": "card",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00004",
+          "tenure_months": 55.0,
+          "monthly_charges": 117.45,
+          "support_tickets_3m": 2.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 26.7,
+          "contract_type": "monthly",
+          "payment_method": "manual",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00005",
+          "tenure_months": 55.0,
+          "monthly_charges": 73.88,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 4.69,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00006",
+          "tenure_months": 55.0,
+          "monthly_charges": 55.37,
+          "support_tickets_3m": 0.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 36.37,
+          "contract_type": "annual",
+          "payment_method": "card",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00007",
+          "tenure_months": 2.0,
+          "monthly_charges": 74.44,
+          "support_tickets_3m": 2.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 60.27,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "dsl"
+        }
+      ]
+    },
+    "duration_seconds": 0.045999999972991645
+  },
+  {
+    "evidence_id": "E0007",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "inputs",
+      "columns": null,
+      "offset": 0,
+      "limit": 8
+    },
+    "created_at": "2026-11-09T16:31:47.869920+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "inputs",
+      "sha256": "c24d352e7be4423774ace88635fba761f1bd4a27899ef83402597aeca378dfe0",
+      "total_rows": 500,
+      "offset": 0,
+      "returned_rows": 8,
+      "columns": [
+        "customer_id",
+        "tenure_months",
+        "monthly_charges",
+        "support_tickets_3m",
+        "late_payments_12m",
+        "usage_hours_month",
+        "contract_type",
+        "payment_method",
+        "internet_service"
+      ],
+      "records": [
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00000",
+          "tenure_months": 41.0,
+          "monthly_charges": 7523.0,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 2.0,
+          "usage_hours_month": 65.26,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00001",
+          "tenure_months": 38.0,
+          "monthly_charges": 6294.0,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 0.0,
+          "usage_hours_month": 49.96,
+          "contract_type": "annual",
+          "payment_method": "manual",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00002",
+          "tenure_months": 40.0,
+          "monthly_charges": 5093.0,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 4.0,
+          "usage_hours_month": 30.28,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00003",
+          "tenure_months": 12.0,
+          "monthly_charges": 9567.0,
+          "support_tickets_3m": 0.0,
+          "late_payments_12m": 0.0,
+          "usage_hours_month": 64.09,
+          "contract_type": "two_year",
+          "payment_method": "card",
+          "internet_service": "dsl"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00004",
+          "tenure_months": 55.0,
+          "monthly_charges": 11745.0,
+          "support_tickets_3m": 2.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 26.7,
+          "contract_type": "monthly",
+          "payment_method": "manual",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00005",
+          "tenure_months": 55.0,
+          "monthly_charges": 7388.0,
+          "support_tickets_3m": 1.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 4.69,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00006",
+          "tenure_months": 55.0,
+          "monthly_charges": 5537.0,
+          "support_tickets_3m": 0.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 36.37,
+          "contract_type": "annual",
+          "payment_method": "card",
+          "internet_service": "fiber"
+        },
+        {
+          "customer_id": "20261101T131436Z-batch-1-episode-003-focus-00007",
+          "tenure_months": 2.0,
+          "monthly_charges": 7444.0,
+          "support_tickets_3m": 2.0,
+          "late_payments_12m": 1.0,
+          "usage_hours_month": 60.27,
+          "contract_type": "monthly",
+          "payment_method": "automatic",
+          "internet_service": "dsl"
+        }
+      ]
+    },
+    "duration_seconds": 0.061999999976251274
+  },
+  {
+    "evidence_id": "E0008",
+    "tool": "inspect_files",
+    "arguments": {
+      "resource_id": "context",
+      "columns": null,
+      "offset": 1250,
+      "limit": 10
+    },
+    "created_at": "2026-11-09T16:31:47.870922+00:00",
+    "result": {
+      "status": "ok",
+      "resource_id": "context",
+      "text": ": 25.986239073662254,\n        \"accuracy\": 0.274,\n        \"precision\": 0.2581967213114754,\n        \"recall\": 0.9921259842519685,\n        \"f1\": 0.4097560975609756,\n        \"roc_auc\": 0.5122965527432396,\n        \"average_precision\": 0.25882777470841817,\n        \"confusion_matrix\": [\n          [\n            11,\n            362\n          ],\n          [\n            1,\n            126\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": true\n    }\n  ],\n  \"deployment\": {\n    \"reference_version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\",\n    \"active_version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\",\n    \"model_changed\": false,\n    \"preprocessing_changed\": false,\n    \"events\": []\n  }\n}",
+      "offset_unit": "characters",
+      "next_offset": null,
+      "sha256": "a8307112713e10e2290e326b3594ecec57b402b7bc841b7e8eb423d5dc81bdb4"
+    },
+    "duration_seconds": 0.030999999959021807
+  }
+]

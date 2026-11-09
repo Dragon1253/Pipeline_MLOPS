@@ -1,0 +1,424 @@
+{
+  "status": "completed",
+  "run_directory": "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\artifacts_v3\\amen_results\\20261109T162635Z-25326131",
+  "final_diagnosis": {
+    "cause_probable": "no_incident",
+    "resume": "L'alerte log_loss est réelle mais marginale et isolée : 0,54354 sur 500 lignes (seuil 0,54123, référence 0,50669), confirmée par recalcul indépendant (E0006). Aucun modèle ni prétraitement n'a changé (même hash, model_changed: false, E0005/E0004), les distributions marginales source vs référence sont stables après correction BH (toutes q > 0,05, E0007) et la relation cible/caractéristiques ne montre pas de dérive (LR p = 0,3828, pas de gain aux interactions période, E0008). Les fenêtres de confirmation repassent sous le seuil (confirmation-1 : 0,53800 ; confirmation-2 : 0,51300, E0005). L'excédent est donc une fluctuation ponctuelle autour d'un seuil serré, sans preuve d'incident sous-jacent (ni corruption, ni drift de données, ni dérive de concept, ni régression de déploiement).",
+    "preuves": [
+      "E0001",
+      "E0003",
+      "E0005",
+      "E0006",
+      "E0007",
+      "E0008"
+    ]
+  },
+  "raw_final_text": "{\n  \"cause_probable\": \"no_incident\",\n  \"resume\": \"L'alerte log_loss est réelle mais marginale et isolée : 0,54354 sur 500 lignes (seuil 0,54123, référence 0,50669), confirmée par recalcul indépendant (E0006). Aucun modèle ni prétraitement n'a changé (même hash, model_changed: false, E0005/E0004), les distributions marginales source vs référence sont stables après correction BH (toutes q > 0,05, E0007) et la relation cible/caractéristiques ne montre pas de dérive (LR p = 0,3828, pas de gain aux interactions période, E0008). Les fenêtres de confirmation repassent sous le seuil (confirmation-1 : 0,53800 ; confirmation-2 : 0,51300, E0005). L'excédent est donc une fluctuation ponctuelle autour d'un seuil serré, sans preuve d'incident sous-jacent (ni corruption, ni drift de données, ni dérive de concept, ni régression de déploiement).\",\n  \"preuves\": [\"E0001\", \"E0003\", \"E0005\", \"E0006\", \"E0007\", \"E0008\"]\n}",
+  "duration_seconds": 49.57799999997951,
+  "error": null,
+  "model_calls": 4,
+  "tool_calls": 8,
+  "empty_response_retries": 0,
+  "json_format_retries": 0,
+  "tools_used": [
+    "inspect_files",
+    "inspect_files",
+    "inspect_files",
+    "inspect_files",
+    "inspect_files",
+    "evaluate_predictions",
+    "compare_distributions",
+    "compare_conditional_relationship"
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E0001",
+      "tool": "inspect_files",
+      "arguments": {
+        "resource_id": "alert",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "created_at": "2026-11-09T16:26:40.217130+00:00",
+      "result": {
+        "status": "ok",
+        "resource_id": "alert",
+        "text": "{\n  \"alert_id\": \"episode-005-focus-alert\",\n  \"window_id\": \"episode-005-focus\",\n  \"metric\": \"log_loss\",\n  \"observed_value\": 0.5435363482548169,\n  \"direction\": \"higher_is_worse\",\n  \"reference_value\": 0.506686987886057,\n  \"threshold\": 0.5412309701555961,\n  \"labeled_rows\": 500\n}",
+        "offset_unit": "characters",
+        "next_offset": null,
+        "sha256": "8b5771bac1494ea018a53ac260738a435b5e03d884308bafd6ab5e451d4ededd"
+      },
+      "duration_seconds": 0.061999999976251274
+    },
+    {
+      "evidence_id": "E0002",
+      "tool": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "created_at": "2026-11-09T16:26:40.218131+00:00",
+      "result": {
+        "status": "ok",
+        "resource_id": "context",
+        "text": "{\n  \"episode_id\": \"episode-005\",\n  \"threshold\": 0.5412309701555961,\n  \"performance_history\": [\n    {\n      \"window\": \"focus\",\n      \"metrics\": {\n        \"log_loss\": 0.5435363482548169,\n        \"accuracy\": 0.72,\n        \"precision\": 0.6111111111111112,\n        \"recall\": 0.28205128205128205,\n        \"f1\": 0.38596491228070173,\n        \"roc_auc\": 0.7342166070363744,\n        \"average_precision\": 0.5586210655324311,\n        \"confusion_matrix\": [\n          [\n            316,\n            28\n          ],\n          [\n            112,\n            44\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": true\n    },\n    {\n      \"window\": \"confirmation-1\",\n      \"metrics\": {\n        \"log_loss\": 0.5379962540166316,\n        \"accuracy\": 0.716,\n        \"precision\": 0.5901639344262295,\n        \"recall\": 0.23529411764705882,\n        \"f1\": 0.3364485981308411,\n        \"roc_auc\": 0.7420278389934265,\n        \"average_precision\": 0.553397405355304,\n        \"confusion_matrix\": [\n          [\n            322,\n            25\n          ],\n          [\n            117,\n            36\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": false\n    },\n    {\n      \"window\": \"confirmation-2\",\n      \"metrics\": {\n        \"log_loss",
+        "offset_unit": "characters",
+        "next_offset": 1250,
+        "sha256": "84a46e895e4cae2497c28b98222af416b7393603006f3917d9e29dcaa028aa5c"
+      },
+      "duration_seconds": 0.061999999976251274
+    },
+    {
+      "evidence_id": "E0003",
+      "tool": "inspect_files",
+      "arguments": {
+        "resource_id": "metrics",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "created_at": "2026-11-09T16:26:40.223141+00:00",
+      "result": {
+        "status": "ok",
+        "resource_id": "metrics",
+        "text": "{\n  \"metrics\": {\n    \"log_loss\": 0.5435363482548169,\n    \"accuracy\": 0.72,\n    \"precision\": 0.6111111111111112,\n    \"recall\": 0.28205128205128205,\n    \"f1\": 0.38596491228070173,\n    \"roc_auc\": 0.7342166070363744,\n    \"average_precision\": 0.5586210655324311,\n    \"confusion_matrix\": [\n      [\n        316,\n        28\n      ],\n      [\n        112,\n        44\n      ]\n    ]\n  },\n  \"labeled_rows\": 500,\n  \"status\": \"alert\",\n  \"alert\": {\n    \"alert_id\": \"episode-005-focus-alert\",\n    \"window_id\": \"episode-005-focus\",\n    \"metric\": \"log_loss\",\n    \"observed_value\": 0.5435363482548169,\n    \"direction\": \"higher_is_worse\",\n    \"reference_value\": 0.506686987886057,\n    \"threshold\": 0.5412309701555961,\n    \"labeled_rows\": 500\n  }\n}",
+        "offset_unit": "characters",
+        "next_offset": null,
+        "sha256": "1e141206177818efe3da55522470560d66fe45a5b777b016e785695667c3f2ef"
+      },
+      "duration_seconds": 0.061999999976251274
+    },
+    {
+      "evidence_id": "E0004",
+      "tool": "inspect_files",
+      "arguments": {
+        "resource_id": "model_catalog",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "created_at": "2026-11-09T16:26:40.227097+00:00",
+      "result": {
+        "status": "ok",
+        "resource_id": "model_catalog",
+        "text": "{\n  \"models\": [\n    {\n      \"id\": \"reference_model\",\n      \"version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\"\n    },\n    {\n      \"id\": \"active_model\",\n      \"version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\"\n    }\n  ],\n  \"execution\": \"Inférence locale en lecture seule via compare_model_versions ; binaires non transmis au LLM.\"\n}",
+        "offset_unit": "characters",
+        "next_offset": null,
+        "sha256": "2bf6665018d889ea67dbffeae50f96ccbe63da79e919f9876c3ea75ac6614630"
+      },
+      "duration_seconds": 0.0779999999795109
+    },
+    {
+      "evidence_id": "E0005",
+      "tool": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 1250,
+        "limit": 6
+      },
+      "created_at": "2026-11-09T16:26:50.581530+00:00",
+      "result": {
+        "status": "ok",
+        "resource_id": "context",
+        "text": "\": 0.5129998306177667,\n        \"accuracy\": 0.746,\n        \"precision\": 0.5846153846153846,\n        \"recall\": 0.2753623188405797,\n        \"f1\": 0.37438423645320196,\n        \"roc_auc\": 0.7451157018175995,\n        \"average_precision\": 0.5126103314632798,\n        \"confusion_matrix\": [\n          [\n            335,\n            27\n          ],\n          [\n            100,\n            38\n          ]\n        ]\n      },\n      \"labeled_rows\": 500,\n      \"alert\": false\n    }\n  ],\n  \"deployment\": {\n    \"reference_version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\",\n    \"active_version\": \"sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450\",\n    \"model_changed\": false,\n    \"preprocessing_changed\": false,\n    \"events\": []\n  }\n}",
+        "offset_unit": "characters",
+        "next_offset": null,
+        "sha256": "84a46e895e4cae2497c28b98222af416b7393603006f3917d9e29dcaa028aa5c"
+      },
+      "duration_seconds": 0.0470000000204891
+    },
+    {
+      "evidence_id": "E0006",
+      "tool": "evaluate_predictions",
+      "arguments": {
+        "predictions": "predictions",
+        "feedback": "feedback",
+        "key": "customer_id",
+        "target": "churn",
+        "probability": "probability",
+        "prediction": "prediction",
+        "group_by": null,
+        "group_resource": null
+      },
+      "created_at": "2026-11-09T16:26:50.582566+00:00",
+      "result": {
+        "status": "ok",
+        "observations": {
+          "prediction_rows": 500,
+          "feedback_rows": 500,
+          "matched_rows": 500,
+          "excluded_missing": 0,
+          "metrics": {
+            "rows": 500,
+            "positive_labels": 156,
+            "positive_predictions": 72,
+            "log_loss": 0.5435363482548169,
+            "accuracy": 0.72,
+            "roc_auc": 0.7342166070363744,
+            "confusion_matrix": [
+              [
+                316,
+                28
+              ],
+              [
+                112,
+                44
+              ]
+            ]
+          }
+        },
+        "provenance": "Ressources publiques du catalogue, vérifiées par SHA256 ; calcul déterministe en lecture seule."
+      },
+      "duration_seconds": 0.14100000000325963
+    },
+    {
+      "evidence_id": "E0007",
+      "tool": "compare_distributions",
+      "arguments": {
+        "left": "source",
+        "right": "reference_clients",
+        "columns": [
+          "tenure_months",
+          "monthly_charges",
+          "support_tickets_3m",
+          "late_payments_12m",
+          "usage_hours_month",
+          "contract_type",
+          "payment_method",
+          "internet_service"
+        ]
+      },
+      "created_at": "2026-11-09T16:26:50.584564+00:00",
+      "result": {
+        "status": "ok",
+        "observations": {
+          "left_rows": 500,
+          "right_rows": 2000,
+          "columns": [
+            {
+              "column": "tenure_months",
+              "left_nonmissing": 487,
+              "right_nonmissing": 1947,
+              "left_missing_rate": 0.026,
+              "right_missing_rate": 0.0265,
+              "test": "KS",
+              "statistic": 0.0670393771705852,
+              "p_value": 0.05688627058190033,
+              "wasserstein": 1.8096529278445543,
+              "mean_left": 35.437371663244356,
+              "mean_right": 37.16846430405752,
+              "q_value_bh": 0.41380988034704824
+            },
+            {
+              "column": "monthly_charges",
+              "left_nonmissing": 486,
+              "right_nonmissing": 1926,
+              "left_missing_rate": 0.028,
+              "right_missing_rate": 0.037,
+              "test": "KS",
+              "statistic": 0.05047882773739472,
+              "p_value": 0.2655455940227083,
+              "wasserstein": 1.7305845929002734,
+              "mean_left": 74.01734567901235,
+              "mean_right": 72.35612149532712,
+              "q_value_bh": 0.4248729504363332
+            },
+            {
+              "column": "support_tickets_3m",
+              "left_nonmissing": 485,
+              "right_nonmissing": 1936,
+              "left_missing_rate": 0.03,
+              "right_missing_rate": 0.032,
+              "test": "KS",
+              "statistic": 0.052697665502257816,
+              "p_value": 0.22216070311850236,
+              "wasserstein": 0.1377524069182926,
+              "mean_left": 1.3278350515463917,
+              "mean_right": 1.1900826446280992,
+              "q_value_bh": 0.4248729504363332
+            },
+            {
+              "column": "late_payments_12m",
+              "left_nonmissing": 477,
+              "right_nonmissing": 1939,
+              "left_missing_rate": 0.046,
+              "right_missing_rate": 0.0305,
+              "test": "KS",
+              "statistic": 0.015632990702808835,
+              "p_value": 0.9999671960156407,
+              "wasserstein": 0.044348434376361545,
+              "mean_left": 0.740041928721174,
+              "mean_right": 0.7111913357400722,
+              "q_value_bh": 0.9999671960156407
+            },
+            {
+              "column": "usage_hours_month",
+              "left_nonmissing": 480,
+              "right_nonmissing": 1937,
+              "left_missing_rate": 0.04,
+              "right_missing_rate": 0.0315,
+              "test": "KS",
+              "statistic": 0.0362878592324901,
+              "p_value": 0.6750815543694939,
+              "wasserstein": 0.7675491202030632,
+              "mean_left": 44.91127083333333,
+              "mean_right": 45.14459989674754,
+              "q_value_bh": 0.9001087391593252
+            },
+            {
+              "column": "contract_type",
+              "left_nonmissing": 480,
+              "right_nonmissing": 1946,
+              "left_missing_rate": 0.04,
+              "right_missing_rate": 0.027,
+              "test": "chi2",
+              "p_value": 0.1303243556465571,
+              "total_variation": 0.0447306440561836,
+              "q_value_bh": 0.41380988034704824
+            },
+            {
+              "column": "payment_method",
+              "left_nonmissing": 483,
+              "right_nonmissing": 1933,
+              "left_missing_rate": 0.034,
+              "right_missing_rate": 0.0335,
+              "test": "chi2",
+              "p_value": 0.8107970736844099,
+              "total_variation": 0.015241437000810806,
+              "q_value_bh": 0.9266252270678971
+            },
+            {
+              "column": "internet_service",
+              "left_nonmissing": 484,
+              "right_nonmissing": 1940,
+              "left_missing_rate": 0.032,
+              "right_missing_rate": 0.03,
+              "test": "chi2",
+              "p_value": 0.1551787051301431,
+              "total_variation": 0.03177984152679558,
+              "q_value_bh": 0.41380988034704824
+            }
+          ],
+          "limit": "Tests marginaux et correction BH sur les colonnes sélectionnées ; ni preuve causale, ni test de concept drift. Chi2 approximatif si faibles effectifs."
+        },
+        "provenance": "Ressources publiques du catalogue, vérifiées par SHA256 ; calcul déterministe en lecture seule."
+      },
+      "duration_seconds": 0.15700000000651926
+    },
+    {
+      "evidence_id": "E0008",
+      "tool": "compare_conditional_relationship",
+      "arguments": {
+        "reference": "reference_clients",
+        "current": "source",
+        "feedback": "feedback",
+        "key": "customer_id",
+        "target": "churn",
+        "columns": null,
+        "folds": 5,
+        "seed": 42
+      },
+      "created_at": "2026-11-09T16:26:59.693814+00:00",
+      "result": {
+        "status": "ok",
+        "observations": {
+          "method": "conditional_logistic_period_interactions",
+          "tested_quantity": "Relation cible/caractéristiques conditionnellement à X selon la période ; pas distribution marginale des caractéristiques.",
+          "null_hypothesis": "Même relation logistique cible/X dans les deux périodes.",
+          "alternative_hypothesis": "La période modifie l’interception et/ou les effets de X sur la cible.",
+          "reference_resource": "reference_clients",
+          "current_resource": "source",
+          "feedback_resource": "feedback",
+          "features": [
+            "tenure_months",
+            "monthly_charges",
+            "support_tickets_3m",
+            "late_payments_12m",
+            "usage_hours_month",
+            "contract_type",
+            "payment_method",
+            "internet_service"
+          ],
+          "reference_rows": 2000,
+          "current_rows": 500,
+          "matched_feedback_rows": 500,
+          "excluded_labels": 0,
+          "reference_positive_rate": 0.2765,
+          "current_positive_rate": 0.312,
+          "likelihood_ratio": {
+            "statistic": 21.245517581413576,
+            "degrees_of_freedom": 20,
+            "p_value": 0.38281037313910177,
+            "rank_shared": 20,
+            "rank_alternative": 40
+          },
+          "cross_validation": {
+            "folds": 5,
+            "seed": 42,
+            "loss_shared": 0.5179034941823574,
+            "loss_period_interactions": 0.5301239723571495,
+            "loss_gain": -0.012220478174792104,
+            "positive_gain_folds": 1,
+            "fold_results": [
+              {
+                "fold": 1,
+                "test_rows": 500,
+                "loss_shared": 0.551553388602121,
+                "loss_period_interactions": 0.5508372157255499,
+                "loss_gain": 0.0007161728765711084
+              },
+              {
+                "fold": 2,
+                "test_rows": 500,
+                "loss_shared": 0.5080320518119017,
+                "loss_period_interactions": 0.5137763243904625,
+                "loss_gain": -0.005744272578560805
+              },
+              {
+                "fold": 3,
+                "test_rows": 500,
+                "loss_shared": 0.4939381775110603,
+                "loss_period_interactions": 0.5343408418158163,
+                "loss_gain": -0.04040266430475603
+              },
+              {
+                "fold": 4,
+                "test_rows": 500,
+                "loss_shared": 0.5341131894983373,
+                "loss_period_interactions": 0.5388073604769725,
+                "loss_gain": -0.004694170978635226
+              },
+              {
+                "fold": 5,
+                "test_rows": 500,
+                "loss_shared": 0.5018806634883665,
+                "loss_period_interactions": 0.5128581193769464,
+                "loss_gain": -0.010977455888579901
+              }
+            ]
+          },
+          "assumptions": [
+            "Échantillons indépendants et labels fiables.",
+            "Logit linéaire après imputation/encodage ; alternative avec période et interactions période×variables.",
+            "Approximation asymptotique chi2 ; une mauvaise spécification ou un support insuffisant peut tromper le test."
+          ],
+          "limit": "Preuve conditionnelle paramétrique, pas test universel de P(y|X), ni preuve de causalité ou de fiabilité des labels. Les modèles auxiliaires ne remplacent pas le modèle servi."
+        },
+        "provenance": "Ressources publiques du catalogue, vérifiées par SHA256 ; calcul déterministe en lecture seule."
+      },
+      "duration_seconds": 1.5780000000377186
+    }
+  ],
+  "remaining_model_calls": 8,
+  "remaining_tool_calls": 8,
+  "usage": {
+    "input_tokens": 36567,
+    "output_tokens": 3401,
+    "total_tokens": 39968
+  },
+  "originals_preserved": true
+}

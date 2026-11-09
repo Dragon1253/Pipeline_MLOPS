@@ -1,0 +1,117 @@
+{
+  "request": 1,
+  "first_chunk_seconds": 1.281,
+  "first_text_seconds": null,
+  "duration_seconds": 3.11,
+  "generations": [
+    {
+      "message": {
+        "content": "",
+        "additional_kwargs": {
+          "reasoning_content": "Let me start by understanding the situation. There's an alert about log_loss being much higher than expected: observed 25.23 vs reference 0.5067 vs threshold 0.5412. That's a massive degradation.\n\nLet me first look at the alert and context files, and then investigate.\n\nI need to be efficient with tool calls (budget: 12 model decisions, 16 tool calls). Let me start by reading alert.json, context.json, metrics.json, model_catalog.json, and maybe predictions.csv.\n\nLet me start with inspecting the key JSON files.",
+          "_reasoning_api_fields": [
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content",
+            "reasoning_content"
+          ]
+        },
+        "response_metadata": {
+          "finish_reason": "tool_calls",
+          "model_name": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+          "request": 1,
+          "first_chunk_seconds": 1.281,
+          "first_text_seconds": null,
+          "duration_seconds": 3.11
+        },
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [
+          {
+            "name": "inspect_files",
+            "args": {
+              "resource_id": "alert"
+            },
+            "id": "call-2185ddb5-1b49-4849-8d70-a2fa7f4c2a71",
+            "type": "tool_call"
+          },
+          {
+            "name": "inspect_files",
+            "args": {
+              "resource_id": "context"
+            },
+            "id": "call-cab19fd7-08ff-4bc7-bbf8-ddacae43d71c",
+            "type": "tool_call"
+          },
+          {
+            "name": "inspect_files",
+            "args": {
+              "resource_id": "metrics"
+            },
+            "id": "call-657530a0-9fa8-48b4-ad0f-32d64ec4f94e",
+            "type": "tool_call"
+          },
+          {
+            "name": "inspect_files",
+            "args": {
+              "resource_id": "model_catalog"
+            },
+            "id": "call-f111ec58-826c-40a5-83ec-c5e74bb87546",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 4314,
+          "output_tokens": 232,
+          "total_tokens": 4546
+        }
+      },
+      "generation_info": null
+    }
+  ]
+}

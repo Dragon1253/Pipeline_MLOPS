@@ -1,0 +1,5 @@
+{
+  "cause_probable": "no_incident",
+  "resume": "L'alerte log_loss est réelle mais marginale et isolée : 0,54354 sur 500 lignes (seuil 0,54123, référence 0,50669), confirmée par recalcul indépendant (E0006). Aucun modèle ni prétraitement n'a changé (même hash, model_changed: false, E0005/E0004), les distributions marginales source vs référence sont stables après correction BH (toutes q > 0,05, E0007) et la relation cible/caractéristiques ne montre pas de dérive (LR p = 0,3828, pas de gain aux interactions période, E0008). Les fenêtres de confirmation repassent sous le seuil (confirmation-1 : 0,53800 ; confirmation-2 : 0,51300, E0005). L'excédent est donc une fluctuation ponctuelle autour d'un seuil serré, sans preuve d'incident sous-jacent (ni corruption, ni drift de données, ni dérive de concept, ni régression de déploiement).",
+  "preuves": ["E0001", "E0003", "E0005", "E0006", "E0007", "E0008"]
+}
