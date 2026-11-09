@@ -1,0 +1,14 @@
+{
+  "provider": "nvidia_langchain",
+  "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+  "temperature": 1,
+  "top_p": 0.95,
+  "max_output_tokens": 16384,
+  "reasoning": true,
+  "tool_protocol": "native",
+  "timeout_seconds": 180,
+  "max_model_calls": 12,
+  "max_tool_calls": 16,
+  "seed": 42,
+  "request_interval_seconds": 3
+}

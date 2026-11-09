@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1180" role="img" aria-labelledby="title description">
+  <title id="title">Architecture de la chaîne MLOps intégrée</title>
+  <desc id="description">Le monitoring génère une alerte et un épisode, l'analyse fournit un diagnostic et des preuves, puis l'orchestrateur choisit une correction simulée ou une revue humaine. Le relecteur décide sur une page Flask via un lien email à jeton; seule une approbation explicite autorise la simulation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#475569" />
+    </marker>
+    <style>
+      .title { font: 700 28px 'Segoe UI', sans-serif; fill: #102a43; }
+      .subtitle { font: 16px 'Segoe UI', sans-serif; fill: #486581; }
+      .label { font: 700 20px 'Segoe UI', sans-serif; fill: #102a43; }
+      .body { font: 16px 'Segoe UI', sans-serif; fill: #334e68; }
+      .small { font: 14px 'Segoe UI', sans-serif; fill: #486581; }
+      .box { stroke-width: 2; rx: 14; }
+      .arrow { fill: none; stroke: #475569; stroke-width: 3; marker-end: url(#arrow); }
+      .branch { fill: none; stroke: #475569; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1000" height="1180" fill="#f5f8fa" />
+  <text class="title" x="500" y="42" text-anchor="middle">Monitoring → analyse → correction</text>
+  <text class="subtitle" x="500" y="70" text-anchor="middle">Prototype local · preuves vérifiées · aucune modification de production</text>
+
+  <rect class="box" x="230" y="105" width="540" height="125" fill="#e6f4f1" stroke="#16816b" />
+  <text class="label" x="500" y="145" text-anchor="middle">1. Monitoring</text>
+  <text class="body" x="500" y="175" text-anchor="middle">Flux simulé → alerte confirmée → épisode</text>
+  <text class="small" x="500" y="202" text-anchor="middle">Données source, entrées et métriques conservées</text>
+
+  <path class="arrow" d="M500 230 V270" />
+  <rect class="box" x="230" y="275" width="540" height="145" fill="#eaf2f8" stroke="#3572a5" />
+  <text class="label" x="500" y="315" text-anchor="middle">2. Analyse</text>
+  <text class="body" x="500" y="347" text-anchor="middle">Mode fixture : comparaison déterministe</text>
+  <text class="body" x="500" y="374" text-anchor="middle">Mode NVIDIA/local : agent Amen + outils analytiques</text>
+  <text class="small" x="500" y="401" text-anchor="middle">Diagnostic + identifiants de preuves</text>
+
+  <path class="arrow" d="M500 420 V460" />
+  <rect class="box" x="230" y="465" width="540" height="140" fill="#fff4d6" stroke="#c58b12" />
+  <text class="label" x="500" y="505" text-anchor="middle">3. Orchestrateur LangGraph</text>
+  <text class="body" x="500" y="537" text-anchor="middle">LLM propose : correction ou revue humaine</text>
+  <text class="small" x="500" y="570" text-anchor="middle">Le garde-fou valide score heuristique et preuves (seuil 0,70)</text>
+
+  <path class="arrow" d="M500 605 V635" />
+  <path d="M500 635 L625 700 L500 765 L375 700 Z" fill="#fff" stroke="#64748b" stroke-width="2" />
+  <text class="label" x="500" y="694" text-anchor="middle">Score ≥ 0,70</text>
+  <text class="small" x="500" y="718" text-anchor="middle">et preuves concordantes ?</text>
+
+  <path class="branch" d="M375 700 H215 V795" />
+  <text class="small" x="255" y="685" text-anchor="middle">Non</text>
+  <path class="branch" d="M625 700 H785 V795" />
+  <text class="small" x="745" y="685" text-anchor="middle">Oui</text>
+
+  <rect class="box" x="45" y="800" width="340" height="145" fill="#fce9e7" stroke="#c43d32" />
+  <text class="label" x="215" y="842" text-anchor="middle">Revue humaine + email SMTP</text>
+  <text class="body" x="215" y="875" text-anchor="middle">Lien vers la page Flask de décision</text>
+  <text class="small" x="215" y="903" text-anchor="middle">Approuver : simulation · Refuser : arrêt</text>
+
+  <rect class="box" x="615" y="800" width="340" height="145" fill="#e9f5e9" stroke="#4b8b51" />
+  <text class="label" x="785" y="842" text-anchor="middle">Agent de correction</text>
+  <text class="body" x="785" y="875" text-anchor="middle">Plan → garde-fou → exécution simulée</text>
+  <text class="small" x="785" y="903" text-anchor="middle">Quarantaine, réentraînement ou rollback préparé</text>
+
+  <path class="arrow" d="M215 945 V1010 H500" />
+  <path class="arrow" d="M785 945 V1010 H500" />
+  <rect class="box" x="230" y="1015" width="540" height="120" fill="#edf0f5" stroke="#64748b" />
+  <text class="label" x="500" y="1055" text-anchor="middle">Résultat et traces</text>
+  <text class="body" x="500" y="1085" text-anchor="middle">pipeline_result.json · preuves · score · action</text>
+  <text class="small" x="500" y="1112" text-anchor="middle">Vérification : production inchangée</text>
+</svg>

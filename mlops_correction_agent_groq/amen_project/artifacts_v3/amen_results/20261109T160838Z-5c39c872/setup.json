@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-11-09T16:08:38.774896+00:00",
+  "config": {
+    "source_experiment": "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo",
+    "episode_dir": "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003",
+    "episode_id": "episode-003",
+    "output_dir": "artifacts_v3\\amen_results",
+    "model_version_comparison": true
+  },
+  "source_hashes": {
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\focus\\source.csv": "54256067163cbe8e2baade94e3a964903daf2471c9eacb82ceb280fbc1a5427f",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\focus\\inputs.csv": "c24d352e7be4423774ace88635fba761f1bd4a27899ef83402597aeca378dfe0",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\focus\\predictions.csv": "d3b35648c29ad6d2b71736489c948c250d3b792dc9e72fc76e80e0ebcf123cbf",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\focus\\feedback.csv": "60f8d67d68bee3d898fe58f97634b7bdc8c393ac442924f594c3681275c5e95e",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\alert.json": "e013672460c3e936f6ce0620fb43264eeaec9bd2a7232ffa7dbdea3698f4baca",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\context.json": "a8307112713e10e2290e326b3594ecec57b402b7bc841b7e8eb423d5dc81bdb4",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\focus\\monitoring.json": "f85bfc227bf84955ec0d6aa1226f0996de734ef328c2e96bc55785836f10bfab",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\reference_data.csv": "49991f66aecd53fc76f2f4641b29bfca4c5a814c7cf35415af5e441c8aa601ed",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\confirmation-1\\monitoring.json": "333f3d4411e64dc2b8b2375b40681425a5c195dfae52cdc94d8cd5e9c48949f5",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\confirmation-2\\monitoring.json": "e9898e5246c512b1e4bf296636195968ce3513c9e36607c811cf1a07289280b3",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\models\\reference.joblib": "cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "C:\\Users\\ghada azouz\\Downloads\\mlops_correction_agent_groq\\mlops_correction_agent_groq\\amen_project\\scenario_data\\demo\\episodes\\episode-003\\active.joblib": "cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450"
+  },
+  "policy": "Seules les observations publiques sont copiées ; aucune vérité de simulation."
+}

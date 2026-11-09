@@ -1,0 +1,13 @@
+{
+  "dataset": "synthetic_bike_demand",
+  "status": "pending_human_approval",
+  "baseline_mae": 8.796176925103872,
+  "degraded_mae": 91.24780077637492,
+  "validation_mae_v1": 91.24780077637492,
+  "validation_mae_v2": 53.66257376991784,
+  "holdout_mae_v1": 91.17257026662642,
+  "holdout_mae_v2": 54.70173763167368,
+  "candidate_better_on_holdout": true,
+  "production_model": "v1_production.joblib",
+  "candidate_model": "v2_candidate.joblib"
+}

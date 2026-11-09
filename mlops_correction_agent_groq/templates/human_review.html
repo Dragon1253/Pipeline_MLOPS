@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Validation humaine MLOps</title>
+    <style>
+        :root { color-scheme: light; font-family: Segoe UI, sans-serif; }
+        body { margin: 0; background: #f2f5f3; color: #17231f; }
+        main { max-width: 720px; margin: 48px auto; padding: 0 20px; }
+        section { background: white; border: 1px solid #d6dfda; border-radius: 6px; padding: 24px; }
+        h1 { margin-top: 0; font-size: 1.6rem; }
+        dl { display: grid; grid-template-columns: minmax(130px, 0.35fr) 1fr; gap: 12px; }
+        dt { color: #52635b; }
+        dd { margin: 0; overflow-wrap: anywhere; }
+        .notice { border-left: 4px solid #d28a22; padding: 12px; background: #fff8e9; }
+        .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+        button { border: 0; border-radius: 4px; padding: 11px 16px; font: inherit; cursor: pointer; }
+        .approve { background: #176b4a; color: white; }
+        .reject { background: #9c3434; color: white; }
+        @media (max-width: 520px) { main { margin: 20px auto; } dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 10px; } }
+    </style>
+</head>
+<body>
+<main>
+    <section>
+        <h1>Validation humaine requise</h1>
+        <dl>
+            <dt>Incident</dt><dd>{{ review.request.incident_id }}</dd>
+            <dt>Type</dt><dd>{{ review.request.incident_type }}</dd>
+            <dt>Cause proposée</dt><dd>{{ review.request.cause_probable }}</dd>
+            <dt>Confiance</dt><dd>{{ review.request.confidence }}</dd>
+            <dt>Preuves</dt><dd>{{ review.request.evidence_ids | join(', ') or 'Aucune' }}</dd>
+            <dt>Motif</dt><dd>{{ review.request.reason }}</dd>
+            <dt>Résumé</dt><dd>{{ review.request.description }}</dd>
+        </dl>
+        {% if review.status == 'pending' %}
+            <p class="notice">Approuver autorise uniquement l'action simulée correspondant au type connu. Aucune modification de production n'est possible.</p>
+            <form method="post" action="{{ url_for('human_review_decision', review_id=review.review_id) }}">
+                <input type="hidden" name="token" value="{{ token }}">
+                <div class="actions">
+                    <button class="approve" type="submit" name="decision" value="approved">Approuver l'action simulée</button>
+                    <button class="reject" type="submit" name="decision" value="rejected">Refuser</button>
+                </div>
+            </form>
+        {% else %}
+            <p>Statut : <strong>{{ review.status }}</strong>{% if review.decision %} ({{ review.decision }}){% endif %}</p>
+            {% if review.execution and review.execution.tool_result %}
+                <p>Action : {{ review.execution.plan.action }}. Résultat : {{ review.execution.tool_result.status }}.</p>
+            {% elif review.execution and review.execution.error %}
+                <p>Exécution bloquée : {{ review.execution.error }}</p>
+            {% endif %}
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

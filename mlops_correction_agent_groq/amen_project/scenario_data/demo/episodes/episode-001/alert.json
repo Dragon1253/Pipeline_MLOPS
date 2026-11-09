@@ -1,0 +1,10 @@
+{
+  "alert_id": "episode-001-focus-alert",
+  "window_id": "episode-001-focus",
+  "metric": "log_loss",
+  "observed_value": 0.693360286453477,
+  "direction": "higher_is_worse",
+  "reference_value": 0.506686987886057,
+  "threshold": 0.5412309701555961,
+  "labeled_rows": 500
+}

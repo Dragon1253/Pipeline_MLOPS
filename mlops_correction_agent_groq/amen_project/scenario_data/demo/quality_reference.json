@@ -1,0 +1,104 @@
+{
+  "profile": {
+    "rows": 4000,
+    "features": {
+      "tenure_months": {
+        "dtype": "float64",
+        "missing_ratio": 0.033,
+        "quantiles": {
+          "0": 1.0,
+          "0.25": 18.0,
+          "0.5": 37.0,
+          "0.75": 55.0,
+          "1": 72.0
+        }
+      },
+      "monthly_charges": {
+        "dtype": "float64",
+        "missing_ratio": 0.029,
+        "quantiles": {
+          "0": 15.0,
+          "0.25": 58.28,
+          "0.5": 73.25999999999999,
+          "0.75": 87.81,
+          "1": 139.9
+        }
+      },
+      "support_tickets_3m": {
+        "dtype": "float64",
+        "missing_ratio": 0.02725,
+        "quantiles": {
+          "0": 0.0,
+          "0.25": 0.0,
+          "0.5": 1.0,
+          "0.75": 2.0,
+          "1": 6.0
+        }
+      },
+      "late_payments_12m": {
+        "dtype": "float64",
+        "missing_ratio": 0.032,
+        "quantiles": {
+          "0": 0.0,
+          "0.25": 0.0,
+          "0.5": 1.0,
+          "0.75": 1.0,
+          "1": 5.0
+        }
+      },
+      "usage_hours_month": {
+        "dtype": "float64",
+        "missing_ratio": 0.0295,
+        "quantiles": {
+          "0": 0.0,
+          "0.25": 32.8,
+          "0.5": 44.665,
+          "0.75": 56.7425,
+          "1": 120.0
+        }
+      },
+      "contract_type": {
+        "dtype": "object",
+        "missing_ratio": 0.03275,
+        "frequencies": {
+          "monthly": 0.5598345825794779,
+          "annual": 0.29232359782889633,
+          "two_year": 0.14784181959162573
+        }
+      },
+      "payment_method": {
+        "dtype": "object",
+        "missing_ratio": 0.02875,
+        "frequencies": {
+          "automatic": 0.45276705276705276,
+          "card": 0.30244530244530243,
+          "manual": 0.24478764478764478
+        }
+      },
+      "internet_service": {
+        "dtype": "object",
+        "missing_ratio": 0.0305,
+        "frequencies": {
+          "fiber": 0.49045899948427024,
+          "dsl": 0.41593604951005675,
+          "none": 0.09360495100567302
+        }
+      }
+    }
+  },
+  "missing_limits": {
+    "tenure_months": 0.1,
+    "monthly_charges": 0.1,
+    "support_tickets_3m": 0.1,
+    "late_payments_12m": 0.1,
+    "usage_hours_month": 0.1,
+    "contract_type": 0.1,
+    "payment_method": 0.1,
+    "internet_service": 0.1
+  },
+  "rules": {
+    "missing_warning_floor": 0.1,
+    "missing_margin": 0.03,
+    "missing_block_ratio": 0.8
+  }
+}

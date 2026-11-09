@@ -1,0 +1,33 @@
+{
+  "metrics": {
+    "log_loss": 1.4514957683624574,
+    "accuracy": 0.222,
+    "precision": 0.3787878787878788,
+    "recall": 0.06702412868632708,
+    "f1": 0.11389521640091116,
+    "roc_auc": 0.22009246163264445,
+    "average_precision": 0.5990354363415028,
+    "confusion_matrix": [
+      [
+        86,
+        41
+      ],
+      [
+        348,
+        25
+      ]
+    ]
+  },
+  "labeled_rows": 500,
+  "status": "alert",
+  "alert": {
+    "alert_id": "episode-002-confirmation-2-alert",
+    "window_id": "episode-002-confirmation-2",
+    "metric": "log_loss",
+    "observed_value": 1.4514957683624574,
+    "direction": "higher_is_worse",
+    "reference_value": 0.506686987886057,
+    "threshold": 0.5412309701555961,
+    "labeled_rows": 500
+  }
+}

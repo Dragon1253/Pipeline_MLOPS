@@ -1,0 +1,170 @@
+{
+  "successful_evidence": [
+    {
+      "evidence_id": "E0001",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "alert",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0002",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "context",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0003",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "metrics",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0004",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "predictions",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0005",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "feedback",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0006",
+      "method": "inspect_files",
+      "arguments": {
+        "resource_id": "model_catalog",
+        "columns": null,
+        "offset": 0,
+        "limit": 5
+      },
+      "quantity": "lecture de fichier ou échantillon",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0007",
+      "method": "describe_resource",
+      "arguments": {
+        "resource_id": "predictions",
+        "columns": null
+      },
+      "quantity": "description de la ressource complète",
+      "status": "ok",
+      "observations_retained_in_tool_message": true
+    },
+    {
+      "evidence_id": "E0008",
+      "method": "compare_tables",
+      "arguments": {
+        "left": "source",
+        "right": "inputs",
+        "key": "customer_id",
+        "columns": null,
+        "rtol": 1e-07,
+        "atol": 1e-09
+      },
+      "quantity": "valeurs des mêmes identifiants entre deux ressources",
+      "status": "ok",
+      "observations": {
+        "matched_rows": 500,
+        "left_only": 0,
+        "right_only": 0,
+        "rtol": 1e-07,
+        "atol": 1e-09,
+        "columns": [
+          {
+            "column": "tenure_months",
+            "changed_values": 0,
+            "common_missing_values": 14,
+            "missing_transitions": 0,
+            "median_right_over_left": null
+          },
+          {
+            "column": "monthly_charges",
+            "changed_values": 478,
+            "common_missing_values": 22,
+            "missing_transitions": 0,
+            "median_right_over_left": 100.0
+          },
+          {
+            "column": "support_tickets_3m",
+            "changed_values": 0,
+            "common_missing_values": 18,
+            "missing_transitions": 0,
+            "median_right_over_left": null
+          },
+          {
+            "column": "late_payments_12m",
+            "changed_values": 0,
+            "common_missing_values": 10,
+            "missing_transitions": 0,
+            "median_right_over_left": null
+          },
+          {
+            "column": "usage_hours_month",
+            "changed_values": 0,
+            "common_missing_values": 16,
+            "missing_transitions": 0,
+            "median_right_over_left": null
+          },
+          {
+            "column": "contract_type",
+            "changed_values": 0,
+            "common_missing_values": 11,
+            "missing_transitions": 0
+          },
+          {
+            "column": "payment_method",
+            "changed_values": 0,
+            "common_missing_values": 16,
+            "missing_transitions": 0
+          },
+          {
+            "column": "internet_service",
+            "changed_values": 0,
+            "common_missing_values": 14,
+            "missing_transitions": 0
+          }
+        ]
+      }
+    }
+  ],
+  "failed_or_cached_operations": []
+}
