@@ -1,0 +1,2 @@
+{"incident_id": "HUMAN-001", "recommended_action": "human_review", "human_decision": "investigation_requested", "timestamp": "2026-11-09T14:57:34.256467+00:00", "production_modified": false}
+{"incident_id": "HUMAN-003", "recommended_action": "prepare_rollback", "human_decision": "approved", "timestamp": "2026-11-09T14:58:06.252017+00:00", "production_modified": false}

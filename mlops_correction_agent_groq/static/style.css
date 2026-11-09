@@ -1,0 +1,140 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f6fb;
+    color: #18243a;
+}
+
+.container {
+    max-width: 900px;
+    margin: 45px auto;
+    padding: 0 20px;
+}
+
+header {
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    color: #5267c8;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+h1 {
+    font-size: 36px;
+    margin: 8px 0;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 21px;
+}
+
+header p {
+    color: #617086;
+}
+
+.card {
+    background: white;
+    padding: 28px;
+    border-radius: 16px;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 25px rgba(25, 40, 70, 0.06);
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin: 17px 0 7px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font-size: 15px;
+}
+
+button {
+    border: 0;
+    border-radius: 9px;
+    padding: 13px 18px;
+    cursor: pointer;
+    background: #e9edf6;
+    color: #253454;
+    font-weight: 700;
+}
+
+button:hover {
+    filter: brightness(0.95);
+}
+
+button.primary {
+    background: #4259d5;
+    color: white;
+    width: 100%;
+    margin-top: 24px;
+}
+
+button.danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid #e7ebf2;
+}
+
+.metric strong {
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+
+.notice {
+    padding: 14px;
+    background: #fff7e6;
+    border-radius: 9px;
+    color: #895c10;
+}
+
+.success {
+    padding: 14px;
+    background: #e7f7ed;
+    border-radius: 9px;
+    color: #176a3b;
+}
+
+.decision-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .metric {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .metric strong {
+        text-align: left;
+    }
+
+    .decision-form button {
+        width: 100%;
+    }
+}

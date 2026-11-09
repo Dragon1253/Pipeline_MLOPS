@@ -1,0 +1,36 @@
+{
+  "incident": {
+    "incident_id": "S3-BATCH-S3-001",
+    "type": "qualite_donnees",
+    "confidence": 0.95,
+    "metrics": {
+      "missing_rate": 0.35,
+      "baseline_missing_rate": 0.01,
+      "temperature_max": 110.0
+    },
+    "details": {
+      "description": "Lot suspect : valeurs manquantes et temperatures anormales.",
+      "batch_id": "BATCH-S3-001",
+      "data_quality_validated": false
+    }
+  },
+  "proposed_action": "quarantine_batch",
+  "final_action": "quarantine_batch",
+  "guard": {
+    "accepted": true,
+    "proposed_action": "quarantine_batch",
+    "expected_action": "quarantine_batch",
+    "final_action": "quarantine_batch"
+  },
+  "tool_result": {
+    "status": "simulated",
+    "batch_id": "BATCH-S3-001",
+    "blocked_for_retraining": true
+  },
+  "verification": {
+    "safe": true,
+    "production_unchanged": true
+  },
+  "human_decision": null,
+  "timestamp": "2026-11-09T15:06:30.435475+00:00"
+}
