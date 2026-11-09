@@ -23,3 +23,10 @@ frontend/dist/
 frontend/*.tsbuildinfo
 scenario_data/generated/
 !.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example

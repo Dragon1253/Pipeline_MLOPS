@@ -1,0 +1,11 @@
+{
+  "scenario": "S4_simulated_version_regression",
+  "current_version": "v1_reference.joblib",
+  "previous_version": "v2_candidate.joblib",
+  "current_mae": 91.17257026662642,
+  "previous_mae": 54.70173763167368,
+  "rollback_recommended": true,
+  "status": "pending_human_approval",
+  "rollback_executed": false,
+  "production_modified": false
+}

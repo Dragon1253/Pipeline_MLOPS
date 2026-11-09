@@ -1,0 +1,12 @@
+{
+  "incident_id": "PIPELINE-V3-001",
+  "llm_proposed_action": "prepare_retraining",
+  "final_action": "prepare_retraining",
+  "validation_mae_v1": 91.24780077637492,
+  "validation_mae_v2": 53.66257376991784,
+  "holdout_mae_v1": 91.17257026662642,
+  "holdout_mae_v2": 54.70173763167368,
+  "candidate_better_on_holdout": true,
+  "status": "pending_human_approval",
+  "production_modified": false
+}
