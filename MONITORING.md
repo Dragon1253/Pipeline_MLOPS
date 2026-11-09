@@ -179,9 +179,67 @@ Observation sur un premier échantillon (200 flux) : 9 % des fenêtres **sans in
 dépassent le seuil par simple fluctuation. Ces cas sont imprévisibles par nature et
 fixent une limite au score atteignable par tout modèle de prédiction.
 
+### 2.2 Références et premiers modèles (`monitoring/prediction.py`)
+
+| Méthode | Principe |
+| --- | --- |
+| R1 monitoring réactif | Étape 1 : alerte quand les labels montrent la dégradation |
+| R2 seuils fixes | Règle classique sans labels : max(PSI des scores, PSI max des entrées) |
+| R3 log loss estimée | Entropie moyenne des probabilités (log loss attendue si le modèle était calibré) |
+| M1 régression logistique | 70 entrées : signaux, métriques déjà connues, tendances par flux |
+| M2 gradient boosting | `HistGradientBoostingClassifier`, mêmes entrées |
+
+Protocole, fixé avant les résultats : apprentissage sur `train` ; hyperparamètres (PR-AUC)
+et seuil d'alarme choisis sur `validation` ; **même budget de fausses alarmes pour toutes
+les méthodes à score** (5 pour 100 fenêtres saines) ; mesure unique sur `test`, puis sur
+`generalization`. Les tendances n'utilisent que la fenêtre courante et les précédentes
+(vérifié par un test) ; `truth_*`, `target_*`, `react_*` ne sont jamais des entrées.
+
+Mesures par flux dégradé : **détection** (l'incident est-il signalé ?), **délai** depuis
+le début de l'incident, **avance sur R1** (de combien de fenêtres l'alarme précède l'alerte
+réactive), fausses alarmes pour 100 fenêtres saines.
+
+```powershell
+.\.venv\Scripts\python.exe -m monitoring predict --target target_now
+.\.venv\Scripts\python.exe -m monitoring predict --target target_h2
+.\.venv\Scripts\python.exe -m monitoring predict --target target_h2 --groups sig    # ablation
+```
+
+#### Résultats sur le test (500 flux, mesure finale)
+
+Cible `target_h2` (dégradation dans les 2 prochaines fenêtres) :
+
+| Méthode | PR-AUC | Détection | Délai depuis le début | Avance sur R1 | Fausses alarmes / 100 |
+| --- | --- | --- | --- | --- | --- |
+| R1 monitoring réactif | — | 99 % | 2,30 | — | 7,9 |
+| R2 seuils fixes | 0,83 | 86 % | 0,79 | 1,50 | 4,8 |
+| R3 log loss estimée | 0,60 | 45 % | 2,02 | 0,58 | 5,0 |
+| M1 régression logistique | 0,89 | 100 % | 0,54 | 1,76 | 4,9 |
+| **M2 gradient boosting** | **0,90** | **100 %** | **0,52** | **1,78** | **4,7** |
+
+Avance de M2 sur R1 par scénario : data drift 2,81 · régression de déploiement 2,10 ·
+corruption 1,93 · **concept drift 0,24** fenêtre.
+
+Généralisation (mécanismes jamais vus) : M2 détecte 99 % des flux dégradés avec 2,02
+fenêtres d'avance et 4,1 fausses alarmes / 100 ; la régression logistique 100 % avec 1,95.
+Avec la cible `target_now`, la régression logistique chute à 78 % de détection sur ces
+mécanismes : prédire un horizon de 2 fenêtres généralise mieux.
+
+#### Lecture
+
+* Les modèles appris détectent tous les incidents **avec environ 1,8 fenêtre d'avance** sur
+  le monitoring réactif, tout en faisant **moins** de fausses alarmes que lui (≈ 5 contre 8).
+* R3 seule échoue (45 %) : la log loss estimée ne voit ni la corruption (modèle sûr de lui
+  et faux) ni la régression (probabilités inversées, même entropie). R2 rate les incidents
+  qui ne changent pas les distributions. Combiner les signaux est donc nécessaire.
+* **Concept drift : presque aucune avance** (0,24 fenêtre). Les entrées et la forme des
+  prédictions restent normales ; seule la relation avec la réalité change. Il n'est détecté
+  qu'à l'arrivée des labels. C'est l'hypothèse H2, confirmée.
+* Limite : 9 % des fenêtres saines dépassent le seuil par fluctuation ; ces cas sont
+  imprévisibles et plafonnent le PR-AUC.
+
 ### Suite prévue
 
-2.2 références R2 (seuils fixes sur les signaux) et R3 (log loss estimée sans labels) ;
-2.3 régression logistique et gradient boosting ; 2.4 GRU et LSTM ; 2.5 ablation des
-groupes de signaux, test de généralisation et explication des alertes ; 2.6 alerte
-`predictive` transmise dans le workflow.
+2.3 GRU et LSTM sur les séquences de fenêtres, comparés à M2 ; 2.4 ablation des groupes
+de signaux, intervalles de confiance et explication des alertes ; 2.5 alerte `predictive`
+transmise dans le workflow.

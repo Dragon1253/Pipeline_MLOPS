@@ -4,10 +4,17 @@
     python -m monitoring run --scenario deployment_regression --seed 2 --investigate nvidia
     python -m monitoring evaluate --seeds 30
     python -m monitoring dataset --split train --workers 4
+    python -m monitoring predict --target target_h2 --budget 5
 """
 import argparse
 import json
+import os
 import warnings
+
+# joblib cherche le nombre de cœurs physiques avec « wmic », absent des Windows récents, et
+# affiche un avertissement sans conséquence. Une limite inférieure au nombre total de cœurs
+# lui évite cette recherche (une limite égale ne suffit pas).
+os.environ.setdefault("LOKY_MAX_CPU_COUNT", str(max(1, (os.cpu_count() or 2) - 1)))
 
 from .stream import STREAM_SCENARIOS, StreamSpec
 
@@ -38,6 +45,13 @@ def build_parser():
                          choices=["train", "validation", "test", "generalization"])
     dataset.add_argument("--streams", type=int, help="nombre de flux (par défaut : taille prévue du découpage)")
     dataset.add_argument("--workers", type=int, default=1, help="processus en parallèle")
+    predict = sub.add_parser("predict", help="entraîner et comparer les modèles de prédiction de l'alerte")
+    predict.add_argument("--target", default="target_now",
+                         choices=["target_now", "target_h1", "target_h2", "target_h3"])
+    predict.add_argument("--budget", type=float, default=5.0,
+                         help="fausses alarmes autorisées pour 100 fenêtres saines (choix du seuil)")
+    predict.add_argument("--groups", nargs="+", default=["sig", "known", "trend"],
+                         choices=["sig", "known", "trend"], help="groupes de signaux utilisés (ablation)")
     return parser
 
 
@@ -54,6 +68,12 @@ def main(argv=None):
             manifest = json.loads(path.with_suffix(".manifest.json").read_text(encoding="utf-8"))
             print(f"{split} : {manifest['rows']} lignes, {manifest['streams']} flux -> {path}")
             print("  part des cibles à 1 : " + ", ".join(f"{k} {v:.1%}" for k, v in manifest["positive_rate"].items()))
+        return 0
+    if args.command == "predict":
+        from .prediction import run
+        folder, _ = run(args.target, args.budget, groups=tuple(args.groups))
+        print((folder / "report.md").read_text(encoding="utf-8"))
+        print(f"Résultats : {folder}")
         return 0
     common = dict(n_windows=args.windows, onset=args.onset, ramp=args.ramp, max_intensity=args.intensity)
     if args.command == "run":
