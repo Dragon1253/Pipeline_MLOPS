@@ -123,9 +123,65 @@ boucle de relecture de `run_incident` par `monitoring.service.run_stream(..., on
 dont les événements `metric_recorded` et `alert_triggered` sont déjà connus de l'interface,
 puis appeler `investigate(episode_dir=<paquet>)`.
 
-## Suite : prédire l'alerte
+## Étape 2 : prédire l'alerte
 
-`monitoring_context.json` enregistre déjà, à chaque fenêtre, les signaux disponibles
-avant les labels. Ils serviront à entraîner le modèle qui prédit une dégradation à
-venir (régression logistique, gradient boosting, puis GRU / LSTM), comparé au monitoring
-réactif ci-dessus sur les mêmes flux.
+Question : **peut-on anticiper une alerte avant l'arrivée des labels, et pour quels incidents ?**
+Le monitoring réactif ci-dessus sert de référence (R1) : il ne voit une fenêtre dégradée
+qu'après `label_delay` fenêtres.
+
+### 2.1 Jeu de données (`monitoring/dataset.py`)
+
+Des milliers de flux sont simulés avec `run_stream`, en variant les réglages ; chaque
+fenêtre devient une ligne.
+
+| Groupe de colonnes | Contenu | Rôle |
+| --- | --- | --- |
+| `sig_*` | Forme des prédictions (proba moyenne, taux prédit positif, entropie, PSI des scores…) et état des entrées (PSI par variable, hors plage, manquants) | Entrées du modèle, connues au moment `t` |
+| `known_*`, `label_delay` | Métriques des fenêtres dont les labels sont **déjà arrivés** à `t` (log loss des 3 dernières, accuracy, recall, F1, AUC, pente) | Entrées du modèle |
+| `react_*` | Décision du monitoring réactif à ce pas | Référence R1 |
+| `label_log_loss`, `target_now`, `target_h1…h3` | Log loss réelle de `t` ; `t` dépasse le seuil ; une des fenêtres `t+1 … t+h` dépasse le seuil | Cibles, jamais des entrées |
+| `truth_*` | Scénario, variante, intensité, début | Analyse des résultats uniquement |
+
+`target_now` fait gagner `label_delay` fenêtres sur le monitoring réactif ; `target_h{k}`
+annonce en plus une dégradation **future**.
+
+Grille, tirée à partir de la seule graine du flux (avant toute simulation) : 40 % de flux
+normaux, sinon un des 4 incidents ; intensité max 25 / 50 / 100 % ; montée 0, 2, 4 ou 8
+fenêtres ; début entre les fenêtres 6 et 14 ; retard des labels 1, 2 ou 3 ; 24 fenêtres.
+
+| Découpage | Graines | Flux | Mécanismes |
+| --- | --- | --- | --- |
+| `train` | 1 – 2 000 | 2 000 | standard |
+| `validation` | 10 001 – 10 500 | 500 | standard |
+| `test` | 20 001 – 20 500 | 500 | standard (utilisé une seule fois, à la fin) |
+| `generalization` | 30 001 – 30 300 | 300 | **jamais vus** : drift vers le segment mensuel + paiement manuel, lien X → churn qui s'efface au lieu de s'inverser, `usage_hours_month` × 10, version trop sûre d'elle |
+
+Chaque fichier a un manifeste (`*.manifest.json`) : grille, graines, nombre de lignes,
+part des cibles à 1 et empreinte SHA-256 du CSV.
+
+```powershell
+# Tout générer (environ 10 minutes avec 4 processus ; sans --workers : environ 30 minutes)
+.\.venv\Scripts\python.exe -m monitoring dataset --workers 4
+
+# Un essai rapide
+.\.venv\Scripts\python.exe -m monitoring dataset --split train --streams 50
+```
+
+Sorties : `monitoring_runs/dataset/{train,validation,test,generalization}.csv`.
+
+Contrôles (tests `tests/test_monitoring_dataset.py`) : plages de graines disjointes,
+configurations reproductibles, colonnes `known_*` construites **uniquement** à partir des
+labels déjà reçus (vérifié pour des retards de 1, 2 et 3), cibles cohérentes avec la log
+loss future, aucune colonne de vérité ou de cible parmi les entrées, variante `heldout`
+réellement différente.
+
+Observation sur un premier échantillon (200 flux) : 9 % des fenêtres **sans incident**
+dépassent le seuil par simple fluctuation. Ces cas sont imprévisibles par nature et
+fixent une limite au score atteignable par tout modèle de prédiction.
+
+### Suite prévue
+
+2.2 références R2 (seuils fixes sur les signaux) et R3 (log loss estimée sans labels) ;
+2.3 régression logistique et gradient boosting ; 2.4 GRU et LSTM ; 2.5 ablation des
+groupes de signaux, test de généralisation et explication des alertes ; 2.6 alerte
+`predictive` transmise dans le workflow.

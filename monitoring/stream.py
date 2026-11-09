@@ -8,6 +8,7 @@ sans les modifier. Chaque fenêtre est rendue en deux parties séparées :
 * ``truth`` : le scénario et son intensité, réservés à l'évaluation. Le
   monitoring et l'agent d'analyse ne doivent jamais les recevoir.
 """
+import copy
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -17,6 +18,9 @@ from mlops_churn.scenarios import FEATURES, deployment_candidate, generate_churn
 
 INCIDENTS = ("data_drift", "concept_drift", "data_corruption", "deployment_regression")
 STREAM_SCENARIOS = (*INCIDENTS, "normal")
+# "standard" : mécanismes de l'étape 1 et de l'agent. "heldout" : mécanismes différents,
+# jamais utilisés pour entraîner le modèle de prédiction (test de généralisation).
+VARIANTS = ("standard", "heldout")
 BATCH_SIZE = 500
 MISSING_RATE = 0.03
 
@@ -36,10 +40,13 @@ class StreamSpec:
     ramp: int = 4
     max_intensity: float = 1.0
     batch_size: int = BATCH_SIZE
+    variant: str = "standard"
 
     def __post_init__(self):
         if self.scenario not in STREAM_SCENARIOS:
             raise ValueError(f"Scénario inconnu : {self.scenario}")
+        if self.variant not in VARIANTS:
+            raise ValueError(f"Variante inconnue : {self.variant}")
         if self.n_windows < 1 or self.batch_size < 100:
             raise ValueError("n_windows doit être >= 1 et batch_size >= 100.")
         if self.scenario != "normal" and not 0 <= self.onset < self.n_windows:
@@ -77,7 +84,23 @@ def _boundary_population(bundle, n, seed):
     return pool.iloc[selected]
 
 
-def make_progressive_window(scenario, alpha, bundle, n, seed):
+def _segment_population(n, seed):
+    """Variante : segment de clients à contrat mensuel et paiement manuel (sélection sur X seul)."""
+    pool = generate_churn(n * 12, seed)
+    segment = pool[(pool["contract_type"] == "monthly") & (pool["payment_method"] == "manual")]
+    return segment.iloc[:n] if len(segment) >= n else pool.iloc[:n]
+
+
+def overconfident_candidate(bundle, factor=4.0):
+    """Variante : nouvelle version trop sûre d'elle (coefficients et intercept multipliés)."""
+    candidate = copy.deepcopy(bundle)
+    classifier = candidate["pipeline"].named_steps["classifier"]
+    classifier.coef_ *= factor
+    classifier.intercept_ *= factor
+    return candidate
+
+
+def make_progressive_window(scenario, alpha, bundle, n, seed, variant="standard"):
     """Construit une fenêtre pour un scénario à l'intensité ``alpha`` (0 = normal, 1 = incident complet).
 
     * data_drift : une part ``alpha`` des clients vient d'une population proche de la frontière ;
@@ -85,19 +108,27 @@ def make_progressive_window(scenario, alpha, bundle, n, seed):
     * data_corruption : une part ``alpha`` des lignes reçoit monthly_charges x 100 après la source ;
     * deployment_regression : une mise en production est un saut, la version inversée sert
       toute la fenêtre dès que ``alpha`` > 0.
+
+    Variante ``heldout`` (mécanismes jamais vus à l'entraînement du modèle de prédiction) :
+    drift vers le segment « mensuel + paiement manuel », lien X → churn qui s'efface
+    (concept_scale 1 → 0) au lieu de s'inverser, usage_hours_month x 10, version trop sûre d'elle.
     Retourne (source, inputs, labels, modèle servi, modèle changé).
     """
+    heldout = variant == "heldout"
     if not 0 <= alpha <= 1:
         raise ValueError("alpha doit appartenir à [0, 1].")
     rng = np.random.default_rng(seed + 7_919)
     if scenario == "data_drift" and alpha > 0:
         shifted = int(round(alpha * n))
-        parts = [_boundary_population(bundle, shifted, seed + 500_000)]
+        population = _segment_population(shifted, seed + 500_000) if heldout else \
+            _boundary_population(bundle, shifted, seed + 500_000)
+        parts = [population]
         if shifted < n:
             parts.append(generate_churn(max(n - shifted, 100), seed).iloc[: n - shifted])
         frame = pd.concat(parts, ignore_index=True)
     elif scenario == "concept_drift":
-        frame = generate_churn(n, seed, MISSING_RATE, concept_scale=1.0 - 2.0 * alpha)
+        scale = 1.0 - alpha if heldout else 1.0 - 2.0 * alpha
+        frame = generate_churn(n, seed, MISSING_RATE, concept_scale=scale)
     else:
         frame = generate_churn(n, seed, MISSING_RATE)
     frame = frame.sample(frac=1.0, random_state=seed % (2**32)).reset_index(drop=True)
@@ -107,9 +138,11 @@ def make_progressive_window(scenario, alpha, bundle, n, seed):
     active, changed = bundle, False
     if scenario == "data_corruption" and alpha > 0:
         corrupted = rng.random(n) < alpha
-        inputs.loc[corrupted, "monthly_charges"] = inputs.loc[corrupted, "monthly_charges"] * 100
+        column, factor = ("usage_hours_month", 10) if heldout else ("monthly_charges", 100)
+        inputs.loc[corrupted, column] = inputs.loc[corrupted, column] * factor
     elif scenario == "deployment_regression" and alpha > 0:
-        active, changed = deployment_candidate(bundle), True
+        active = overconfident_candidate(bundle) if heldout else deployment_candidate(bundle)
+        changed = True
     return source, inputs, labels, active, changed
 
 
@@ -124,7 +157,7 @@ def simulate_stream(spec, bundle, run_id="stream"):
         alpha = intensity(spec, index)
         seed = spec.seed * 1_000 + index
         source, inputs, labels, active, changed = make_progressive_window(
-            spec.scenario, alpha, bundle, spec.batch_size, seed)
+            spec.scenario, alpha, bundle, spec.batch_size, seed, spec.variant)
         if changed:
             # Une seule nouvelle version pour tout le flux, comme un vrai déploiement.
             candidate = candidate or active

@@ -3,6 +3,7 @@
     python -m monitoring run --scenario data_corruption --seed 1
     python -m monitoring run --scenario deployment_regression --seed 2 --investigate nvidia
     python -m monitoring evaluate --seeds 30
+    python -m monitoring dataset --split train --workers 4
 """
 import argparse
 import json
@@ -32,12 +33,28 @@ def build_parser():
     evaluate.add_argument("--scenarios", nargs="+", choices=STREAM_SCENARIOS, default=list(STREAM_SCENARIOS))
     evaluate.add_argument("--seeds", type=int, default=30, help="nombre de flux par scénario")
     evaluate.add_argument("--first-seed", type=int, default=1)
+    dataset = sub.add_parser("dataset", help="générer le jeu de données de prédiction des alertes")
+    dataset.add_argument("--split", nargs="+", default=["train", "validation", "test", "generalization"],
+                         choices=["train", "validation", "test", "generalization"])
+    dataset.add_argument("--streams", type=int, help="nombre de flux (par défaut : taille prévue du découpage)")
+    dataset.add_argument("--workers", type=int, default=1, help="processus en parallèle")
     return parser
 
 
 def main(argv=None):
     warnings.filterwarnings("ignore", message="Trying to unpickle estimator")
     args = build_parser().parse_args(argv)
+    if args.command == "dataset":
+        from .dataset import build_split
+        for split in args.split:
+            def progress(done, total, split=split):
+                if done % 50 == 0 or done == total:
+                    print(f"  {split} : {done}/{total} flux", flush=True)
+            path = build_split(split, n_streams=args.streams, workers=args.workers, progress=progress)
+            manifest = json.loads(path.with_suffix(".manifest.json").read_text(encoding="utf-8"))
+            print(f"{split} : {manifest['rows']} lignes, {manifest['streams']} flux -> {path}")
+            print("  part des cibles à 1 : " + ", ".join(f"{k} {v:.1%}" for k, v in manifest["positive_rate"].items()))
+        return 0
     common = dict(n_windows=args.windows, onset=args.onset, ramp=args.ramp, max_intensity=args.intensity)
     if args.command == "run":
         from .service import run_stream
