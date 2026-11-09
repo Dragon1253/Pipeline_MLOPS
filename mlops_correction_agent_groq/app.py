@@ -7,6 +7,13 @@ from amen_runner import run_amen_investigation
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from agent_v3 import CorrectionAgentV3
+from human_review_store import (
+    HumanReviewStore,
+    InvalidReviewToken,
+    ReviewAlreadyResolved,
+    ReviewNotFound,
+    review_database_path,
+)
 
 app = Flask(__name__)
 app.secret_key = "dev-only-change-this-key"
@@ -28,6 +35,46 @@ def load_report():
         with REPORT_FILE.open("r", encoding="utf-8") as f:
             return json.load(f)
     return None
+
+
+def get_review_store():
+    return HumanReviewStore(review_database_path())
+
+
+def update_pipeline_result(review):
+    result_path = Path(review["pipeline_result_file"])
+    if not result_path.is_file():
+        return
+
+    with result_path.open("r", encoding="utf-8") as file:
+        result = json.load(file)
+    review_result = result.setdefault("human_review", {})
+    review_result["decision"] = review["decision"]
+    review_result["decided_at"] = review["decided_at"]
+    review_result["status"] = review["status"]
+    review_result["execution"] = review["execution"]
+
+    if review["status"] == "completed":
+        result["status"] = "completed_after_human_approval"
+        execution = review["execution"]
+        result["correction"] = {
+            "incident": review["incident"],
+            "proposed_plan": execution["plan"],
+            "final_plan": execution["plan"],
+            "guard": execution["guard_result"],
+            "tool_result": execution["tool_result"],
+            "verification": execution["verification"],
+            "human_approval_id": execution["approval_id"],
+        }
+    elif review["status"] == "rejected":
+        result["status"] = "rejected_by_human"
+    else:
+        result["status"] = "human_review_blocked"
+
+    result_path.write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
 
 
 @app.route("/", methods=["GET"])
@@ -126,6 +173,78 @@ def decision():
 
     return redirect(url_for("index"))
 
+
+@app.route("/human-review/<review_id>", methods=["GET"])
+def human_review_page(review_id):
+    token = request.args.get("token", "")
+    try:
+        review = get_review_store().get_review(review_id, token)
+    except ReviewNotFound:
+        return "Demande de revue introuvable.", 404
+    except InvalidReviewToken:
+        return "Lien de revue invalide.", 403
+
+    return render_template("human_review.html", review=review, token=token)
+
+
+@app.route("/human-review/<review_id>/decision", methods=["POST"])
+def human_review_decision(review_id):
+    token = request.form.get("token", "")
+    decision_value = request.form.get("decision", "")
+    store = get_review_store()
+    try:
+        review = store.resolve(review_id, token, decision_value)
+    except ReviewNotFound:
+        return "Demande de revue introuvable.", 404
+    except InvalidReviewToken:
+        return "Lien de revue invalide.", 403
+    except ReviewAlreadyResolved:
+        return "Cette demande a deja ete traitee.", 409
+    except ValueError:
+        return "Decision invalide.", 400
+
+    if decision_value == "approved":
+        if not store.claim_execution(review_id):
+            return "Cette demande est deja en cours ou terminee.", 409
+        try:
+            CorrectionAgentV3.human_approved_action(review["incident"])
+            agent = CorrectionAgentV3(
+                mode="rules",
+                out_dir=Path(review["run_dir"]) / "human_approved_correction",
+            )
+            execution = agent.run_human_approved(
+                review["incident"], approval_id=review_id
+            )
+            execution_status = (
+                "completed" if execution["verification"]["safe"] else "blocked"
+            )
+            store.complete_execution(
+                review_id, status=execution_status, result=execution
+            )
+        except ValueError as exc:
+            execution = {"error": str(exc), "production_modified": False}
+            store.complete_execution(review_id, status="blocked", result=execution)
+        except Exception:
+            app.logger.exception("Echec de l'action approuvee")
+            execution = {
+                "error": "Erreur pendant l'action simulee.",
+                "production_modified": False,
+            }
+            store.complete_execution(review_id, status="failed", result=execution)
+    else:
+        execution = None
+
+    try:
+        review = store.get_review(review_id, token)
+        update_pipeline_result(review)
+    except (OSError, ValueError, KeyError):
+        app.logger.exception("Impossible de mettre a jour le resultat du pipeline")
+
+    return redirect(url_for(
+        "human_review_page", review_id=review_id, token=token
+    ))
+
+
 @app.route("/analyze-amen", methods=["POST"])
 def analyze_amen():
     try:
@@ -208,4 +327,4 @@ def run_amen():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=False)

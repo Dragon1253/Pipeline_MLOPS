@@ -352,3 +352,48 @@ nécessaires sous forme structurée.
         data = IncidentV3.model_validate(incident).model_dump()
         result = self.graph.invoke({"incident": data})
         return result["history"][-1]
+
+    @staticmethod
+    def human_approved_action(incident: IncidentV3 | dict) -> str:
+        validated = IncidentV3.model_validate(incident)
+        action_by_type = {
+            "fausse_alerte": "close_alert",
+            "qualite_donnees": "quarantine_batch",
+            "derive_donnees": "prepare_retraining",
+            "regression_version": "prepare_rollback",
+        }
+        action = action_by_type.get(validated.type)
+        if action is None:
+            raise ValueError("Un incident de type inconnu ne peut pas être exécuté.")
+        return action
+
+    def run_human_approved(self, incident: IncidentV3 | dict, *, approval_id: str) -> dict:
+        """Simulate only the deterministic action matching a reviewed incident type."""
+        validated = IncidentV3.model_validate(incident)
+        action = self.human_approved_action(validated)
+
+        plan = Plan(
+            action=action,
+            reason=f"Action déterministe autorisée par la validation humaine {approval_id}.",
+        ).model_dump()
+        state = {
+            "incident": validated.model_dump(),
+            "proposed_plan": plan,
+            "plan": plan,
+            "mode": "human_approved",
+            "guard_result": {
+                "accepted": True,
+                "approved_by_human": True,
+                "approval_id": approval_id,
+                "final_action": action,
+            },
+        }
+        state.update(self._execute(state))
+        state.update(self._verify(state))
+        return {
+            "plan": state["plan"],
+            "guard_result": state["guard_result"],
+            "tool_result": state["tool_result"],
+            "verification": state["verification"],
+            "approval_id": approval_id,
+        }

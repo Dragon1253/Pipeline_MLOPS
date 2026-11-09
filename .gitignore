@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 .venv-agent/
 .venv-cloud/
+.venv-correction/
 .env
 .env.*
 .pytest_cache/
@@ -16,6 +17,7 @@ artifacts/experiments/
 artifacts/agent_experiments/
 artifacts/langchain_explorations/
 artifacts/agent_diagnostics/
+mlops_correction_agent_groq/artifacts_v4*/
 results/
 platform_data/
 frontend/node_modules/
