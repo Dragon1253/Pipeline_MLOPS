@@ -5,6 +5,7 @@
     python -m monitoring evaluate --seeds 30
     python -m monitoring dataset --split train --workers 4
     python -m monitoring predict --target target_h2 --budget 5
+    python -m monitoring predict --target target_h2 --sequence gru lstm
 """
 import argparse
 import json
@@ -52,6 +53,9 @@ def build_parser():
                          help="fausses alarmes autorisées pour 100 fenêtres saines (choix du seuil)")
     predict.add_argument("--groups", nargs="+", default=["sig", "known", "trend"],
                          choices=["sig", "known", "trend"], help="groupes de signaux utilisés (ablation)")
+    predict.add_argument("--sequence", nargs="*", default=[], choices=["gru", "lstm"],
+                         help="ajouter les modèles séquentiels (PyTorch requis)")
+    predict.add_argument("--epochs", type=int, default=30, help="époques maximales des modèles séquentiels")
     return parser
 
 
@@ -71,7 +75,8 @@ def main(argv=None):
         return 0
     if args.command == "predict":
         from .prediction import run
-        folder, _ = run(args.target, args.budget, groups=tuple(args.groups))
+        folder, _ = run(args.target, args.budget, groups=tuple(args.groups),
+                        sequence_models=tuple(args.sequence), sequence_epochs=args.epochs)
         print((folder / "report.md").read_text(encoding="utf-8"))
         print(f"Résultats : {folder}")
         return 0

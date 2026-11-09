@@ -238,8 +238,40 @@ mécanismes : prédire un horizon de 2 fenêtres généralise mieux.
 * Limite : 9 % des fenêtres saines dépassent le seuil par fluctuation ; ces cas sont
   imprévisibles et plafonnent le PR-AUC.
 
+### 2.3 Modèles séquentiels : GRU et LSTM (`monitoring/sequence_models.py`)
+
+Question : un réseau qui **lit la suite des fenêtres** fait-il mieux que le gradient
+boosting (M2), qui reçoit des tendances fabriquées à la main ?
+
+* Entrée de la fenêtre `t` : les 40 signaux (`sig_*`, `known_*`, `label_delay`) des 6
+  dernières fenêtres de son flux, plus un canal « remplissage » en début de flux et un
+  indicateur « métriques pas encore connues ». Pas de tendances calculées à la main :
+  le réseau les apprend.
+* Réseau : une couche GRU ou LSTM (32 ou 64 unités, choisi sur la validation), dropout
+  0,1, une sortie. Perte pondérée pour le déséquilibre des classes, Adam, arrêt précoce
+  sur le PR-AUC de validation (patience 4, 30 époques maximum).
+* Même protocole que 2.2 : cible `target_h2`, même budget de fausses alarmes, même test
+  et même généralisation ; le rapport ajoute deux lignes, M3 GRU et M4 LSTM, et un
+  tableau d'avance par scénario pour M2, M3 et M4.
+
+Contrôles (`tests/test_monitoring_sequences.py`) : chaque séquence se termine sur la
+fenêtre courante, ne contient jamais une fenêtre future ni une fenêtre d'un autre flux ;
+la normalisation n'utilise que les statistiques d'entraînement ; un entraînement court
+de bout en bout (ignoré si PyTorch n'est pas installé).
+
+```powershell
+# Une seule fois : PyTorch (environ 200 Mo, version processeur sous Windows)
+.\.venv\Scripts\python.exe -m pip install -r requirements-monitoring.txt
+
+# Tests puis expérience (quelques minutes)
+.\.venv\Scripts\python.exe -m unittest tests.test_monitoring_sequences -v
+.\.venv\Scripts\python.exe -m monitoring predict --target target_h2 --sequence gru lstm
+```
+
+Ce qu'on regarde : PR-AUC, fausses alarmes à détection égale, avance sur les incidents
+progressifs (data drift) et sur le concept drift, et tenue sur les mécanismes jamais vus.
+
 ### Suite prévue
 
-2.3 GRU et LSTM sur les séquences de fenêtres, comparés à M2 ; 2.4 ablation des groupes
-de signaux, intervalles de confiance et explication des alertes ; 2.5 alerte `predictive`
-transmise dans le workflow.
+2.4 ablation des groupes de signaux, intervalles de confiance et explication des alertes ;
+2.5 alerte `predictive` transmise dans le workflow.

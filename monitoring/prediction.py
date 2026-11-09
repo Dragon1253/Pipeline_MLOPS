@@ -42,9 +42,10 @@ TREND_SIGNALS = ["sig_mean_probability", "sig_predicted_positive_rate", "sig_exp
                  "sig_share_uncertain", "sig_tv_max", "sig_std_probability"]
 FORBIDDEN_PREFIXES = ("truth_", "target_", "react_", "label_log_loss")
 METHODS = ("reactive", "static_rules", "expected_loss", "logistic", "boosting")
+SEQUENCE_METHODS = ("gru", "lstm")
 LABELS = {"reactive": "R1 monitoring réactif (étape 1)", "static_rules": "R2 seuils fixes sans labels",
           "expected_loss": "R3 log loss estimée sans labels", "logistic": "M1 régression logistique",
-          "boosting": "M2 gradient boosting"}
+          "boosting": "M2 gradient boosting", "gru": "M3 GRU (séquences)", "lstm": "M4 LSTM (séquences)"}
 
 
 def load_split(name, dataset_dir=DATASET_DIR):
@@ -186,12 +187,12 @@ def reactive_alarms(frame):
     return flagged
 
 
-def evaluate_split(frame, scores, thresholds, target):
+def evaluate_split(frame, scores, thresholds, target, methods=METHODS):
     """Métriques par fenêtre et par flux pour chaque méthode."""
     results = {}
     y = frame[target].to_numpy()
     clean = clean_mask(frame)
-    for method in METHODS:
+    for method in methods:
         if method == "reactive":
             alarms = reactive_alarms(frame)
             window = {}
@@ -201,7 +202,7 @@ def evaluate_split(frame, scores, thresholds, target):
             alarms = scores[method] >= thresholds[method]
             window = {"pr_auc": float(average_precision_score(y, scores[method])),
                       "roc_auc": float(roc_auc_score(y, scores[method]))}
-            if method in ("logistic", "boosting"):
+            if method in ("logistic", "boosting", *SEQUENCE_METHODS):
                 window["brier"] = float(brier_score_loss(y, scores[method]))
             events = event_metrics(frame, alarms)
         results[method] = {
@@ -215,27 +216,52 @@ def evaluate_split(frame, scores, thresholds, target):
 
 
 def run(target="target_now", budget=5.0, dataset_dir=DATASET_DIR, output_dir=DEFAULT_OUTPUT / "prediction",
-        groups=("sig", "known", "trend"), save_models=True):
-    train, validation = load_split("train", dataset_dir), load_split("validation", dataset_dir)
-    columns = feature_columns(train, groups)
-    train, validation = train.dropna(subset=[target]), validation.dropna(subset=[target])
+        groups=("sig", "known", "trend"), save_models=True, sequence_models=(), sequence_epochs=30):
+    """Entraîne, règle sur la validation et compare toutes les méthodes. ``sequence_models`` :
+    ``("gru", "lstm")`` pour ajouter les réseaux récurrents (PyTorch requis)."""
+    full = {"train": load_split("train", dataset_dir), "validation": load_split("validation", dataset_dir)}
+    columns = feature_columns(full["train"], groups)
+    train, validation = (full[k].dropna(subset=[target]) for k in ("train", "validation"))
     models, tuning = fit_models(train, validation, target, columns)
-    val_scores = all_scores(validation, models, columns)
-    thresholds = {m: threshold_for_budget(s, validation, budget) for m, s in val_scores.items()}
+    sequence, methods = {}, METHODS + tuple(sequence_models)
+    if sequence_models:
+        from .sequence_models import fit_sequence_models
+        sequence_columns = feature_columns(full["train"], ("sig", "known"))
+        sequence, sequence_tuning = fit_sequence_models(full["train"], full["validation"], target, sequence_columns,
+                                                        cells=tuple(sequence_models), epochs=sequence_epochs)
+        tuning.update(sequence_tuning)
+
+    def scored(frame):
+        # Les séquences ont besoin du flux complet : score sur toutes les fenêtres, puis
+        # évaluation seulement là où la cible est définie.
+        scores = all_scores(frame, models, columns)
+        for name, model in sequence.items():
+            scores[name] = model.predict_frame(frame)
+        mask = frame[target].notna().to_numpy()
+        return {k: v[mask] for k, v in scores.items()}, frame[mask].reset_index(drop=True)
+
+    val_scores, val_frame = scored(full["validation"])
+    thresholds = {m: threshold_for_budget(s, val_frame, budget) for m, s in val_scores.items()}
     report = {"created_at": datetime.now(timezone.utc).isoformat(), "target": target,
               "false_alarm_budget_per_100_clean_windows": budget, "feature_groups": list(groups),
-              "n_features": len(columns), "tuning": tuning, "thresholds": thresholds, "splits": {}}
+              "n_features": len(columns), "methods": list(methods), "tuning": tuning,
+              "thresholds": thresholds, "splits": {}}
     for split in ("validation", "test", "generalization"):
-        frame = validation if split == "validation" else load_split(split, dataset_dir).dropna(subset=[target])
-        scores = val_scores if split == "validation" else all_scores(frame, models, columns)
-        report["splits"][split] = evaluate_split(frame.reset_index(drop=True), scores, thresholds, target)
-    folder = Path(output_dir) / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + f"-{target}")
+        scores, frame = (val_scores, val_frame) if split == "validation" else scored(load_split(split, dataset_dir))
+        report["splits"][split] = evaluate_split(frame, scores, thresholds, target, methods)
+    suffix = f"-{target}" + ("-" + "-".join(sequence_models) if sequence_models else "")
+    folder = Path(output_dir) / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + suffix)
     folder.mkdir(parents=True, exist_ok=False)
     write_json(folder / "results.json", report)
     (folder / "report.md").write_text(markdown(report), encoding="utf-8")
     if save_models:
         joblib.dump({"models": models, "columns": columns, "thresholds": thresholds, "target": target},
                     folder / "models.joblib")
+        if sequence:
+            import torch
+            torch.save({name: {"state_dict": m.network.state_dict(), "preprocessor": m.preprocessor.__dict__,
+                               "length": m.length, "hidden": tuning[name]["chosen"]["hidden"]}
+                        for name, m in sequence.items()}, folder / "sequence_models.pt")
     return folder, report
 
 
@@ -252,7 +278,7 @@ def markdown(report):
         lines += [f"## {title}", "",
                   "| Méthode | PR-AUC | Détection | Délai depuis le début (fenêtres) | Avance sur R1 (fenêtres) | Plus tôt que R1 | Fausses alarmes / 100 |",
                   "| --- | --- | --- | --- | --- | --- | --- |"]
-        for method in METHODS:
+        for method in report.get("methods", METHODS):
             r = results[method]
             e = r["events"]
             lines.append(f"| {LABELS[method]} | {fmt(r['window'].get('pr_auc'))} | {pct(e.get('detection_rate'))} | "
@@ -260,10 +286,15 @@ def markdown(report):
                          f"{fmt(e.get('mean_lead_vs_reactive')) if method != 'reactive' else '—'} | "
                          f"{pct(e.get('share_earlier_than_reactive')) if method != 'reactive' else '—'} | "
                          f"{fmt(r['false_alarms_per_100_clean_windows'], 1)} |")
-        lines += ["", "Par scénario (meilleur modèle M2 : détection · avance sur R1) :", ""]
-        for scenario, e in results["boosting"]["by_scenario"].items():
-            lines.append(f"- {scenario} : {pct(e.get('detection_rate'))} · {fmt(e.get('mean_lead_vs_reactive'))} fenêtre(s) "
-                         f"sur {e.get('degraded_streams', 0)} flux dégradés")
+        learned = [m for m in report.get("methods", METHODS) if m in ("boosting", *SEQUENCE_METHODS)]
+        scenarios = list(results["boosting"]["by_scenario"])
+        lines += ["", "Avance sur R1 par scénario, en fenêtres (détection entre parenthèses) :", "",
+                  "| Scénario | " + " | ".join(LABELS[m] for m in learned) + " |",
+                  "| --- |" + " --- |" * len(learned)]
+        for scenario in scenarios:
+            cells = [f"{fmt(results[m]['by_scenario'][scenario].get('mean_lead_vs_reactive'))} "
+                     f"({pct(results[m]['by_scenario'][scenario].get('detection_rate'))})" for m in learned]
+            lines.append(f"| {scenario} | " + " | ".join(cells) + " |")
         lines.append("")
     return "\n".join(lines)
 
