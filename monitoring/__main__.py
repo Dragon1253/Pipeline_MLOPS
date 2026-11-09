@@ -6,6 +6,7 @@
     python -m monitoring dataset --split train --workers 4
     python -m monitoring predict --target target_h2 --budget 5
     python -m monitoring predict --target target_h2 --sequence gru lstm
+    python -m monitoring analyze --target target_h2
 """
 import argparse
 import json
@@ -56,6 +57,12 @@ def build_parser():
     predict.add_argument("--sequence", nargs="*", default=[], choices=["gru", "lstm"],
                          help="ajouter les modèles séquentiels (PyTorch requis)")
     predict.add_argument("--epochs", type=int, default=30, help="époques maximales des modèles séquentiels")
+    analyze = sub.add_parser("analyze", help="ablation, intervalles de confiance et explication des alertes (M2)")
+    analyze.add_argument("--target", default="target_h2",
+                         choices=["target_now", "target_h1", "target_h2", "target_h3"])
+    analyze.add_argument("--budget", type=float, default=5.0)
+    analyze.add_argument("--bootstrap", type=int, default=1000, help="tirages du bootstrap")
+    analyze.add_argument("--no-ablation", action="store_true", help="sauter l'ablation (plus rapide)")
     return parser
 
 
@@ -72,6 +79,12 @@ def main(argv=None):
             manifest = json.loads(path.with_suffix(".manifest.json").read_text(encoding="utf-8"))
             print(f"{split} : {manifest['rows']} lignes, {manifest['streams']} flux -> {path}")
             print("  part des cibles à 1 : " + ", ".join(f"{k} {v:.1%}" for k, v in manifest["positive_rate"].items()))
+        return 0
+    if args.command == "analyze":
+        from .analysis import run as analyze
+        folder, _ = analyze(args.target, args.budget, n_boot=args.bootstrap, ablate=not args.no_ablation)
+        print((folder / "report.md").read_text(encoding="utf-8"))
+        print(f"Résultats : {folder}")
         return 0
     if args.command == "predict":
         from .prediction import run

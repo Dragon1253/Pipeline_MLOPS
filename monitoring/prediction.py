@@ -41,6 +41,10 @@ TREND_SIGNALS = ["sig_mean_probability", "sig_predicted_positive_rate", "sig_exp
                  "sig_score_psi", "sig_psi_max", "sig_out_of_range_max", "sig_share_extreme",
                  "sig_share_uncertain", "sig_tv_max", "sig_std_probability"]
 FORBIDDEN_PREFIXES = ("truth_", "target_", "react_", "label_log_loss")
+# known_windows (nombre de fenêtres déjà étiquetées) révèle la position dans le flux ; comme les
+# incidents simulés commencent entre les fenêtres 6 et 14, le modèle apprendrait ce calendrier
+# de simulation, qui n'existe pas en production. Exclu des entrées.
+EXCLUDED_FEATURES = ("known_windows",)
 METHODS = ("reactive", "static_rules", "expected_loss", "logistic", "boosting")
 SEQUENCE_METHODS = ("gru", "lstm")
 LABELS = {"reactive": "R1 monitoring réactif (étape 1)", "static_rules": "R2 seuils fixes sans labels",
@@ -68,7 +72,7 @@ def add_trend_features(frame):
 
 def feature_columns(frame, groups=("sig", "known", "trend")):
     prefixes = tuple(f"{g}_" for g in groups)
-    columns = [c for c in frame.columns if c.startswith(prefixes)]
+    columns = [c for c in frame.columns if c.startswith(prefixes) and c not in EXCLUDED_FEATURES]
     if "known" in groups:
         columns.append("label_delay")
     assert not [c for c in columns if c.startswith(FORBIDDEN_PREFIXES)], "fuite de colonnes"

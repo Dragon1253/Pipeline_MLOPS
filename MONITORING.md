@@ -186,7 +186,7 @@ fixent une limite au score atteignable par tout modèle de prédiction.
 | R1 monitoring réactif | Étape 1 : alerte quand les labels montrent la dégradation |
 | R2 seuils fixes | Règle classique sans labels : max(PSI des scores, PSI max des entrées) |
 | R3 log loss estimée | Entropie moyenne des probabilités (log loss attendue si le modèle était calibré) |
-| M1 régression logistique | 70 entrées : signaux, métriques déjà connues, tendances par flux |
+| M1 régression logistique | 69 entrées : signaux, métriques déjà connues, tendances par flux |
 | M2 gradient boosting | `HistGradientBoostingClassifier`, mêmes entrées |
 
 Protocole, fixé avant les résultats : apprentissage sur `train` ; hyperparamètres (PR-AUC)
@@ -194,6 +194,9 @@ et seuil d'alarme choisis sur `validation` ; **même budget de fausses alarmes p
 les méthodes à score** (5 pour 100 fenêtres saines) ; mesure unique sur `test`, puis sur
 `generalization`. Les tendances n'utilisent que la fenêtre courante et les précédentes
 (vérifié par un test) ; `truth_*`, `target_*`, `react_*` ne sont jamais des entrées.
+`known_windows` (nombre de fenêtres déjà étiquetées) est aussi exclu : il révèle la position
+dans le flux, et le modèle apprendrait que les incidents simulés commencent entre les
+fenêtres 6 et 14, un calendrier qui n'existe pas en production (biais repéré à l'étape 2.4).
 
 Mesures par flux dégradé : **détection** (l'incident est-il signalé ?), **délai** depuis
 le début de l'incident, **avance sur R1** (de combien de fenêtres l'alarme précède l'alerte
@@ -214,14 +217,14 @@ Cible `target_h2` (dégradation dans les 2 prochaines fenêtres) :
 | R1 monitoring réactif | — | 99 % | 2,30 | — | 7,9 |
 | R2 seuils fixes | 0,83 | 86 % | 0,79 | 1,50 | 4,8 |
 | R3 log loss estimée | 0,60 | 45 % | 2,02 | 0,58 | 5,0 |
-| M1 régression logistique | 0,89 | 100 % | 0,54 | 1,76 | 4,9 |
-| **M2 gradient boosting** | **0,90** | **100 %** | **0,52** | **1,78** | **4,7** |
+| M1 régression logistique | 0,89 | 100 % | 0,53 | 1,78 | 4,5 |
+| **M2 gradient boosting** | **0,89** | **100 %** | **0,56** | **1,75** | **4,4** |
 
-Avance de M2 sur R1 par scénario : data drift 2,81 · régression de déploiement 2,10 ·
-corruption 1,93 · **concept drift 0,24** fenêtre.
+Avance de M2 sur R1 par scénario : data drift 2,78 · régression de déploiement 2,10 ·
+corruption 1,93 · **concept drift 0,15** fenêtre.
 
-Généralisation (mécanismes jamais vus) : M2 détecte 99 % des flux dégradés avec 2,02
-fenêtres d'avance et 4,1 fausses alarmes / 100 ; la régression logistique 100 % avec 1,95.
+Généralisation (mécanismes jamais vus) : M2 détecte 100 % des flux dégradés avec 1,85
+fenêtre d'avance et 4,9 fausses alarmes / 100 ; la régression logistique 100 % avec 2,01.
 Avec la cible `target_now`, la régression logistique chute à 78 % de détection sur ces
 mécanismes : prédire un horizon de 2 fenêtres généralise mieux.
 
@@ -232,7 +235,7 @@ mécanismes : prédire un horizon de 2 fenêtres généralise mieux.
 * R3 seule échoue (45 %) : la log loss estimée ne voit ni la corruption (modèle sûr de lui
   et faux) ni la régression (probabilités inversées, même entropie). R2 rate les incidents
   qui ne changent pas les distributions. Combiner les signaux est donc nécessaire.
-* **Concept drift : presque aucune avance** (0,24 fenêtre). Les entrées et la forme des
+* **Concept drift : presque aucune avance** (0,15 fenêtre). Les entrées et la forme des
   prédictions restent normales ; seule la relation avec la réalité change. Il n'est détecté
   qu'à l'arrivée des labels. C'est l'hypothèse H2, confirmée.
 * Limite : 9 % des fenêtres saines dépassent le seuil par fluctuation ; ces cas sont
@@ -268,10 +271,83 @@ de bout en bout (ignoré si PyTorch n'est pas installé).
 .\.venv\Scripts\python.exe -m monitoring predict --target target_h2 --sequence gru lstm
 ```
 
-Ce qu'on regarde : PR-AUC, fausses alarmes à détection égale, avance sur les incidents
-progressifs (data drift) et sur le concept drift, et tenue sur les mécanismes jamais vus.
+#### Résultats (cible `target_h2`, 69 entrées, sans `known_windows`)
+
+| Méthode | Test : PR-AUC | Test : détection | Test : avance sur R1 | Généralisation : détection | Généralisation : avance |
+| --- | --- | --- | --- | --- | --- |
+| M2 gradient boosting | 0,89 | 100 % | 1,75 | **100 %** | 1,85 |
+| M3 GRU | 0,89 | 100 % | 1,72 | **83 %** | 1,79 |
+| M4 LSTM | 0,89 | 100 % | 1,78 | **74 %** | 1,97 |
+
+Sur la corruption jamais vue (`usage_hours_month` × 10) : M2 100 %, GRU **43 %**, LSTM **12 %**.
+Un premier entraînement (avec `known_windows`) donnait l'inverse : GRU 12 %, LSTM 39 %.
+
+* Sur les incidents connus, lire la suite des fenêtres n'apporte rien : les tendances
+  calculées à la main suffisent, et M2 était déjà à 100 % de détection.
+* Sur les incidents jamais vus, les réseaux **surapprennent** : ils ont associé « corruption »
+  à `monthly_charges` ; M2 s'appuie aussi sur des signaux généraux (PSI max, hors plage max)
+  et généralise.
+* Les réseaux sont aussi **instables** : d'un entraînement à l'autre, leur détection de la
+  corruption jamais vue passe de 12 % à 43 % (et inversement), alors que M2 reste à 100 %.
+* **Modèle retenu : M2**, aussi bon, plus robuste, plus stable, plus rapide et explicable.
+  Piste : entraîner les réseaux sur des pannes plus variées ou sur les seuls signaux agrégés.
+
+### 2.4 Consolidation du modèle retenu (`monitoring/analysis.py`)
+
+```powershell
+.\.venv\Scripts\python.exe -m monitoring analyze --target target_h2
+```
+
+#### Intervalles de confiance à 95 % (bootstrap sur 1 000 tirages des flux)
+
+| Mesure (M2, `target_h2`) | Test | Généralisation |
+| --- | --- | --- |
+| Détection des flux dégradés | 100 % [100 ; 100] | 100 % [100 ; 100] |
+| Avance sur R1 (fenêtres) | 1,75 [1,60 ; 1,90] | 1,85 [1,58 ; 2,13] |
+| Fausses alarmes / 100 fenêtres saines | 4,4 [3,9 ; 4,9] | 4,9 [4,3 ; 5,6] |
+| R1 : fausses alarmes / 100 fenêtres saines | 7,9 [7,3 ; 8,4] | 7,4 [6,8 ; 8,2] |
+| PR-AUC | 0,89 [0,88 ; 0,90] | 0,85 [0,82 ; 0,87] |
+
+Les intervalles de M2 et de R1 pour les fausses alarmes ne se chevauchent pas : M2 en fait
+significativement moins que le monitoring réactif, tout en prévenant 1,6 à 1,9 fenêtre plus tôt.
+
+#### Ablation : quelles entrées comptent ?
+
+| Entrées de M2 | Nb | Test : détection | Test : avance sur R1 | Généralisation : détection |
+| --- | --- | --- | --- | --- |
+| Forme des prédictions seule | 10 | 87 % | 1,71 | 89 % |
+| Signaux sans labels (prédictions + entrées) | 27 | 84 % | 1,75 | 90 % |
+| Signaux sans labels + tendances | 57 | 89 % | 1,43 | 92 % |
+| Métriques déjà connues seules | 12 | 100 % | **0,47** | 99 % |
+| Signaux + métriques connues | 39 | 100 % | 1,75 | 99 % |
+| Tout | 69 | 100 % | 1,75 | 100 % |
+
+Lecture : **les signaux sans labels donnent la vitesse** (environ 1,7 fenêtre d'avance) mais
+ratent les incidents qui ne changent pas les distributions (le concept drift) ; **les
+métriques déjà connues donnent l'exhaustivité** (100 %) mais peu d'avance. Il faut les
+deux. Les tendances ajoutent peu une fois les métriques connues présentes.
+
+#### Explication des alertes
+
+Importance par permutation (validation) : la dernière log loss connue domine, puis la
+proba moyenne prédite, le PSI des scores, la pente de la log loss connue et l'accuracy connue.
+
+Pour une alerte, on désigne les signaux directs les plus éloignés de leur valeur habituelle
+(médiane des fenêtres saines, en écarts interquartiles), et on vérifie qu'en les remettant
+ensemble à cette valeur, le risque retombe. Exemples sur le test :
+
+| Scénario | Signaux désignés | Risque → si signaux habituels |
+| --- | --- | --- |
+| Régression de déploiement | PSI des scores 5,17 (habituel 0,02), q10 des probas 0,46 (0,07), proba moyenne 0,73 (0,28) | 1,00 → 0,16 |
+| Concept drift | dernière log loss connue 1,44 (0,51), accuracy connue 0,23 (0,75), pente 0,47 (0) | 1,00 → 0,38 |
+| Data drift | PSI des scores 1,11 (0,02), part de probas incertaines 0,59 (0,17), médiane des probas 0,48 (0,23) | 1,00 → 0,97 |
+| Corruption | hors plage `monthly_charges` 53 % (0 %), part de probas extrêmes 52 % (1 %) | 1,00 → 1,00 |
+
+Pour le data drift et la corruption, le risque reste élevé même sans ces trois signaux :
+beaucoup d'autres signaux concordent. L'explication désigne des signaux, jamais une cause ;
+le diagnostic reste le travail de l'agent d'analyse.
 
 ### Suite prévue
 
-2.4 ablation des groupes de signaux, intervalles de confiance et explication des alertes ;
-2.5 alerte `predictive` transmise dans le workflow.
+2.5 alerte `predictive` produite en direct par M2 et transmise dans le workflow, avec ses
+signaux désignés ; branchement dans l'interface Sentinel.
