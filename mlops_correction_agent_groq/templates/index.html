@@ -41,6 +41,68 @@
                 </button>
             </form>
         </section>
+        
+<section class="card">
+    <h2>Intégration — Agent d'Amen</h2>
+
+    <p>
+        Colle un diagnostic JSON produit par l'agent
+        d'investigation. Il sera transmis à l'agent
+        de correction Groq.
+    </p>
+
+    <form method="POST"
+          action="{{ url_for('analyze_amen') }}">
+
+        <label for="diagnosis_json">
+            Diagnostic d'investigation (JSON)
+        </label>
+
+        <textarea
+            id="diagnosis_json"
+            name="diagnosis_json"
+            rows="12"
+            required
+            style="width:100%;padding:14px;
+                   border:1px solid #cbd5e1;
+                   border-radius:9px;"
+        >{
+  "cause_probable": "data_corruption",
+  "resume": "Des valeurs incoherentes ont ete detectees.",
+  "preuves": ["E0001", "E0002"]
+}</textarea>
+
+        <button type="submit" class="primary">
+            Envoyer à mon agent de correction
+        </button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Investigation automatique — Agent Amen</h2>
+
+    <p>
+        Exécuter l'investigation NVIDIA puis transmettre
+        le diagnostic à l'agent Groq.
+    </p>
+
+    <form method="POST" action="{{ url_for('run_amen') }}">
+        <label>Épisode à analyser</label>
+
+        <select name="episode">
+            <option value="episode-001">Episode 001</option>
+            <option value="episode-002">Episode 002</option>
+            <option value="episode-003" selected>Episode 003</option>
+            <option value="episode-004">Episode 004</option>
+            <option value="episode-005">Episode 005</option>
+        </select>
+
+        <button type="submit" class="primary">
+            Lancer Amen + Groq
+        </button>
+    </form>
+</section>
+
 
         {% if report %}
         <section class="card">
@@ -76,10 +138,23 @@
                 <strong>{{ report.verification.production_unchanged }}</strong>
             </div>
 
-            <p class="notice">
-                La quarantaine est simulée.
-                Aucun lot réel n'est déplacé.
-            </p>
+{% if report.final_action == "human_review" %}
+    <p class="notice">
+        Le garde-fou a bloqué l'action proposée.
+        Une validation humaine est nécessaire.
+        Aucune correction n'a été exécutée.
+    </p>
+{% elif report.final_action == "quarantine_batch" %}
+    <p class="notice">
+        La mise en quarantaine a été simulée.
+        Aucun lot réel n'a été déplacé.
+    </p>
+{% else %}
+    <p class="notice">
+        Action : {{ report.final_action }}.
+        Consultez le statut avant toute intervention.
+    </p>
+{% endif %}
         </section>
 
         <section class="card">

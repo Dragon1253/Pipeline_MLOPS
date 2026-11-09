@@ -1,2 +1,10 @@
 {"incident_id": "HUMAN-001", "recommended_action": "human_review", "human_decision": "investigation_requested", "timestamp": "2026-11-09T14:57:34.256467+00:00", "production_modified": false}
 {"incident_id": "HUMAN-003", "recommended_action": "prepare_rollback", "human_decision": "approved", "timestamp": "2026-11-09T14:58:06.252017+00:00", "production_modified": false}
+{"incident_id": "S3-BATCH-S3-001", "recommended_action": "quarantine_batch", "human_decision": "investigation_requested", "timestamp": "2026-11-09T15:32:47.326322+00:00", "production_modified": false}
+{"incident_id": "S3-BATCH-S3-001", "recommended_action": "quarantine_batch", "human_decision": "approved", "timestamp": "2026-11-09T15:35:57.370258+00:00", "production_modified": false}
+{"incident_id": "S3-BATCH-S3-001", "recommended_action": "quarantine_batch", "human_decision": "rejected", "timestamp": "2026-11-09T15:38:08.457305+00:00", "production_modified": false}
+{"incident_id": "S3-BATCH-S3-001", "recommended_action": "quarantine_batch", "human_decision": "investigation_requested", "timestamp": "2026-11-09T15:38:49.176330+00:00", "production_modified": false}
+{"incident_id": "S3-BATCH-S3-001", "recommended_action": "quarantine_batch", "human_decision": "investigation_requested", "timestamp": "2026-11-09T15:49:14.937399+00:00", "production_modified": false}
+{"incident_id": "AMEN-8eb2031300", "recommended_action": "human_review", "human_decision": "approved", "timestamp": "2026-11-09T15:52:10.284560+00:00", "production_modified": false}
+{"incident_id": "AMEN-3ad3854ad5", "recommended_action": "human_review", "human_decision": "investigation_requested", "timestamp": "2026-11-09T15:52:44.144427+00:00", "production_modified": false}
+{"incident_id": "AMEN-81ed1fda7c", "recommended_action": "human_review", "human_decision": "rejected", "timestamp": "2026-11-09T15:52:51.849776+00:00", "production_modified": false}

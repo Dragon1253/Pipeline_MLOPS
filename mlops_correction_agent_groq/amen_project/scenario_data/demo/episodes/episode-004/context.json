@@ -1,0 +1,91 @@
+{
+  "episode_id": "episode-004",
+  "threshold": 0.5412309701555961,
+  "performance_history": [
+    {
+      "window": "focus",
+      "metrics": {
+        "log_loss": 1.3539589996004289,
+        "accuracy": 0.248,
+        "precision": 0.2289156626506024,
+        "recall": 0.6291390728476821,
+        "f1": 0.33568904593639576,
+        "roc_auc": 0.2741038729387654,
+        "average_precision": 0.20742512208103744,
+        "confusion_matrix": [
+          [
+            29,
+            320
+          ],
+          [
+            56,
+            95
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    },
+    {
+      "window": "confirmation-1",
+      "metrics": {
+        "log_loss": 1.3972407551464734,
+        "accuracy": 0.276,
+        "precision": 0.25882352941176473,
+        "recall": 0.7006369426751592,
+        "f1": 0.37800687285223367,
+        "roc_auc": 0.24757200423390469,
+        "average_precision": 0.20963170453377739,
+        "confusion_matrix": [
+          [
+            28,
+            315
+          ],
+          [
+            47,
+            110
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    },
+    {
+      "window": "confirmation-2",
+      "metrics": {
+        "log_loss": 1.460066124643055,
+        "accuracy": 0.244,
+        "precision": 0.22453703703703703,
+        "recall": 0.6928571428571428,
+        "f1": 0.33916083916083917,
+        "roc_auc": 0.22029761904761905,
+        "average_precision": 0.17924244895303307,
+        "confusion_matrix": [
+          [
+            25,
+            335
+          ],
+          [
+            43,
+            97
+          ]
+        ]
+      },
+      "labeled_rows": 500,
+      "alert": true
+    }
+  ],
+  "deployment": {
+    "reference_version": "sha256:cbf03abbc3e8e691a9924f563c766fd679f139dd6a1c5c87bbb5dc2323fe3450",
+    "active_version": "sha256:064151e9d5f11cf8db1b924e1f35a0e9f1b234f56f735573e8e4d3b32bf896a9",
+    "model_changed": true,
+    "preprocessing_changed": false,
+    "events": [
+      {
+        "event": "model_activated",
+        "window": "focus",
+        "version": "sha256:064151e9d5f11cf8db1b924e1f35a0e9f1b234f56f735573e8e4d3b32bf896a9"
+      }
+    ]
+  }
+}

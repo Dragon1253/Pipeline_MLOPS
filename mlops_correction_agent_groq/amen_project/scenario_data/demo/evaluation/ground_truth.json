@@ -1,0 +1,83 @@
+[
+  {
+    "episode_id": "episode-001",
+    "scenario": "data_drift",
+    "expected_cause": "data_drift",
+    "is_incident": true,
+    "selected_seed": 81001,
+    "confirmation_seeds": [
+      81002,
+      81003
+    ],
+    "selection_attempts": 1,
+    "injection": {
+      "mechanism": "Population concentrée près de la frontière de décision ; sélection indépendante de y."
+    },
+    "focus_alert_verified": true
+  },
+  {
+    "episode_id": "episode-002",
+    "scenario": "concept_drift",
+    "expected_cause": "concept_drift",
+    "is_incident": true,
+    "selected_seed": 80001,
+    "confirmation_seeds": [
+      80002,
+      80003
+    ],
+    "selection_attempts": 1,
+    "injection": {
+      "mechanism": "Signe du logit générateur inversé ; génération de X inchangée."
+    },
+    "focus_alert_verified": true
+  },
+  {
+    "episode_id": "episode-003",
+    "scenario": "data_corruption",
+    "expected_cause": "data_corruption",
+    "is_incident": true,
+    "selected_seed": 83001,
+    "confirmation_seeds": [
+      83002,
+      83003
+    ],
+    "selection_attempts": 1,
+    "injection": {
+      "feature": "monthly_charges",
+      "mechanism": "Conversion d'unité incorrecte après réception ; labels inchangés."
+    },
+    "focus_alert_verified": true
+  },
+  {
+    "episode_id": "episode-004",
+    "scenario": "deployment_regression",
+    "expected_cause": "deployment_regression",
+    "is_incident": true,
+    "selected_seed": 85001,
+    "confirmation_seeds": [
+      85002,
+      85003
+    ],
+    "selection_attempts": 1,
+    "injection": {
+      "mechanism": "Coefficients et intercept de la version servie inversés."
+    },
+    "focus_alert_verified": true
+  },
+  {
+    "episode_id": "episode-005",
+    "scenario": "false_alert",
+    "expected_cause": "no_incident",
+    "is_incident": false,
+    "selected_seed": 90011,
+    "confirmation_seeds": [
+      91002,
+      91003
+    ],
+    "selection_attempts": 11,
+    "injection": {
+      "mechanism": "Lot normal de queue de distribution, sélectionné conditionnellement au franchissement ; aucune corruption."
+    },
+    "focus_alert_verified": true
+  }
+]

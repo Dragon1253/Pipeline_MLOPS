@@ -1,0 +1,33 @@
+{
+  "metrics": {
+    "log_loss": 0.5435363482548169,
+    "accuracy": 0.72,
+    "precision": 0.6111111111111112,
+    "recall": 0.28205128205128205,
+    "f1": 0.38596491228070173,
+    "roc_auc": 0.7342166070363744,
+    "average_precision": 0.5586210655324311,
+    "confusion_matrix": [
+      [
+        316,
+        28
+      ],
+      [
+        112,
+        44
+      ]
+    ]
+  },
+  "labeled_rows": 500,
+  "status": "alert",
+  "alert": {
+    "alert_id": "episode-005-focus-alert",
+    "window_id": "episode-005-focus",
+    "metric": "log_loss",
+    "observed_value": 0.5435363482548169,
+    "direction": "higher_is_worse",
+    "reference_value": 0.506686987886057,
+    "threshold": 0.5412309701555961,
+    "labeled_rows": 500
+  }
+}

@@ -2,6 +2,8 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from integration_adapter import adapt_amen_diagnosis
+from amen_runner import run_amen_investigation
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from agent_v3 import CorrectionAgentV3
@@ -123,6 +125,86 @@ def decision():
     save_report(report)
 
     return redirect(url_for("index"))
+
+@app.route("/analyze-amen", methods=["POST"])
+def analyze_amen():
+    try:
+        raw_json = request.form.get("diagnosis_json", "")
+        amen_result = json.loads(raw_json)
+
+        incident = adapt_amen_diagnosis(amen_result)
+
+        agent = CorrectionAgentV3(
+            mode="llm",
+            out_dir="artifacts_v3",
+        )
+        result = agent.run(incident)
+
+        report = {
+            "incident": incident,
+            "amen_diagnosis": amen_result,
+            "proposed_action": result["proposed_plan"]["action"],
+            "final_action": result["plan"]["action"],
+            "guard": result["guard_result"],
+            "tool_result": result["tool_result"],
+            "verification": result["verification"],
+            "human_decision": None,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        save_report(report)
+        return redirect(url_for("index"))
+
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        return f"Diagnostic invalide : {exc}", 400
+    except Exception:
+        app.logger.exception("Erreur pendant l'integration")
+        return "Erreur interne pendant l'analyse.", 500
+
+
+
+@app.route("/run-amen", methods=["POST"])
+def run_amen():
+    try:
+        episode = request.form.get(
+            "episode", "episode-003"
+        )
+
+        amen_result = run_amen_investigation(
+            episode=episode,
+            provider="nvidia",
+        )
+
+        incident = adapt_amen_diagnosis(amen_result)
+
+        agent = CorrectionAgentV3(
+            mode="llm",
+            out_dir="artifacts_v3",
+        )
+
+        result = agent.run(incident)
+
+        report = {
+            "incident": incident,
+            "amen_diagnosis": amen_result,
+            "proposed_action": result["proposed_plan"]["action"],
+            "final_action": result["plan"]["action"],
+            "guard": result["guard_result"],
+            "tool_result": result["tool_result"],
+            "verification": result["verification"],
+            "human_decision": None,
+            "timestamp": datetime.now(
+                timezone.utc
+            ).isoformat(),
+        }
+
+        save_report(report)
+        return redirect(url_for("index"))
+
+    except Exception:
+        app.logger.exception("Echec de l'investigation")
+        return "Erreur pendant l'investigation Amen.", 500
+
 
 
 if __name__ == "__main__":

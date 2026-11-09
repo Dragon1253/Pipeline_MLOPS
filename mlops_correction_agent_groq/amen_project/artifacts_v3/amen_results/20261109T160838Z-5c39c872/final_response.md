@@ -1,0 +1,7 @@
+Les preuves sont suffisantes. Constat clé : entre `source` et `inputs` (mêmes 500 clients), `monthly_charges` a été multiplié par 100 (478 valeurs modifiées, ratio médian 100, moyenne 71,91 → 7 191,07), toutes les autres colonnes inchangées. Le modèle unique (version identique référence/actif `sha256:cbf03abb…`) émet donc des probabilités proches de 1 pour quasi tout le monde (médiane 1,0, 483/500 prédits churn), d'où le log_loss 25,23 vs seuil 0,54. Ce n'est ni un drift de population ni un changement de version de modèle : c'est une transformation défaillante du pipeline de déploiement (source → inputs) qui a corrompu une feature.
+
+{
+  "cause_probable": "deployment_regression",
+  "resume": "Log_loss passé de 0,507 (référence) / seuil 0,541 à 25,23 (alerte confirmée, fenêtre episode-003-focus, 500 lignes labellisées). Entre source et inputs sur les mêmes 500 clients, monthly_charges a été multiplié par 100 (478 valeurs modifiées, ratio médian 100, moyenne 71,91 → 7 191,07 ; toutes les autres features inchangées). Le modèle servie est le seul et même que la référence (sha256:cbf03abb…), il renvoie des probabilités proches de 1 pour 483/500 clients (médiane 1,0), ce qui explique l'explosion du log_loss. Pas de drift de distribution de population ni de changement de version de modèle : la cause est une transformation défaillante du pipeline de déploiement entre la capture source et les données reçues par le modèle.",
+  "preuves": ["E0001", "E0003", "E0007", "E0008"]
+}
