@@ -113,7 +113,7 @@ rangées dans `monitoring_runs/sentinel` (base séparée de `platform_data/`).
 .\.venv\Scripts\python.exe sentinel_app.py --orchestrator llm     # orchestrateur Groq
 ```
 
-Puis ouvrir http://127.0.0.1:8000 et cliquer sur « Lancer un scénario ». Quand l'orchestrateur demande une revue humaine, un panneau « Revue humaine » apparaît dans la page de l'incident avec les boutons Approuver / Refuser ; la décision passe par la logique de `app.py` (inchangé), servie par le même serveur, et le lien de l'e-mail ouvre aussi cette adresse. Il n'est plus nécessaire de lancer `app.py`. L'interface compilée
+Puis ouvrir http://127.0.0.1:8000 et cliquer sur « Lancer un scénario ». Quand l'orchestrateur demande une revue humaine, une notification « Correction à approuver » apparaît dans Sentinel (aucun e-mail) avec la correction prévue, et un panneau « Revue humaine » dans la page de l'incident propose Approuver / Refuser ; la décision passe par la logique de `app.py` (inchangé), servie par le même serveur. Après une correction automatique ou approuvée, l'action choisie par l'agent de correction est appliquée dans le système simulé (`monitoring/remediation.py` : correction des entrées, retour à la version de référence ou réentraînement déployé seulement s'il fait mieux), puis le monitoring mesure 6 fenêtres supplémentaires : la validation est réussie si la log loss moyenne repasse sous le seuil. L'interface compilée
 (`frontend/dist`, ignorée par Git) se régénère avec `npm ci` puis `npm run build` dans `frontend`.
 
 ## 4. Résultat attendu en mode hors ligne (`fixture`, sans clé)
